@@ -1,67 +1,93 @@
-# Proposed System Architecture
+# System architecture
 
-This conceptual architecture describes planned components for E-CHAKRA. It does not represent an implemented application or select frameworks, hosting providers or an offline database technology.
+[Project overview](../README.md) · [Collector workflow](collector-workflow.md) · [Data plan](data-plan.md)
+
+This is the proposed design for the first prototype. The diagram separates five responsibilities; it does not imply five separately deployed services. A single backend with clear modules is sufficient for the initial pilot.
+
+## Components and data flow
 
 ```mermaid
 flowchart TB
-    subgraph DEVICE["Collector device: offline capture"]
-        APP["Collector mobile app"]
-        LOCAL[("Local offline storage")]
-        SYNC["Synchronization"]
-        APP <-->|"Capture and edit locally"| LOCAL
-        LOCAL <--> SYNC
+    subgraph UI["1. Participant interfaces"]
+        C["Collector interface"]
+        R["Recycler interface"]
     end
-
-    subgraph PARTICIPANTS["Other participant interfaces: online"]
-        RECYCLER["Authorised recycler interface"]
-        AGGREGATOR["Aggregator interface"]
-        REPAIR["Repair-shop interface: reusable electronics"]
+    subgraph LOCAL["2. Offline capture on the collector device"]
+        D["Local drafts and photos"]
+        Q["Pending sync queue"]
     end
-
-    subgraph ONLINE["Online services: connectivity required"]
-        API["Backend API"]
-
-        subgraph CORE["Collector-facing core services"]
-            LOTS["Lots"]
-            OFFERS["Prices / offers and matching"]
-            RECORDS["Handovers and payment records"]
-        end
-
-        PG[("PostgreSQL")]
-        MEDIA[("Separate media storage")]
-
-        subgraph ML["Proposed cloud ML functions"]
-            CLASSIFY["Material classification"]
-            ESTIMATE["Price estimation / prediction"]
-            MATCH["Authorised recycler matching"]
-        end
-
-        API <--> LOTS
-        API <--> OFFERS
-        API <--> RECORDS
-        LOTS <--> PG
-        OFFERS <--> PG
-        RECORDS <--> PG
-        LOTS <--> MEDIA
-        LOTS <--> CLASSIFY
-        OFFERS <--> ESTIMATE
-        OFFERS <--> MATCH
+    subgraph CORE["3. Application services"]
+        API["Backend API and access checks"]
+        CHECK["Participant and material eligibility"]
+        TX["Lots, offers, handovers and payments"]
     end
-
-    APP <-->|"Online requests"| API
-    SYNC <-->|"When connected"| API
-    RECYCLER <--> API
-    AGGREGATOR <--> API
-    REPAIR <--> API
+    subgraph ASSIST["4. Decision support"]
+        FILTER["Material, area and quantity filters"]
+        ML["Optional ML assistance"]
+    end
+    subgraph STORE["5. Central storage"]
+        DB[("PostgreSQL")]
+        MEDIA[("Media storage")]
+    end
+    C <--> D
+    D --> Q
+    Q -->|"When connected"| API
+    C <-->|"Online requests and sync results"| API
+    R <--> API
+    API --> CHECK
+    CHECK --> TX
+    TX --> FILTER
+    FILTER -.-> ML
+    TX <--> DB
+    CHECK <--> DB
+    API <--> MEDIA
+    classDef device fill:#eff6ff,stroke:#2563eb,color:#0f172a
+    classDef service fill:#ecfdf5,stroke:#15803d,color:#0f172a
+    class C,R,D,Q device
+    class API,CHECK,TX,FILTER,DB,MEDIA service
 ```
 
-## How the components work together
+Solid arrows show the main path. The dotted connection is a later ML extension. Aggregator and repair/refurbishment interfaces will use the same access-controlled backend when those workflows are introduced.
 
-- **Offline capture:** the collector app would save photographs, a manually confirmed category and approximate weight on the device without contacting the backend. Local storage includes a separate database for records and local media files. Synchronization would queue pending changes and transfer them when connectivity returns, with retry and duplicate/conflict handling to be designed.
-- **Connected services:** the backend API would coordinate lots, price history and buyer offers, matching, handovers and payment records. Live offers and cloud ML results require connectivity. Any previously downloaded price or offer information shown offline should carry its timestamp and be labelled as potentially outdated.
-- **Central storage:** PostgreSQL would hold structured records and media references. Separate media storage would hold uploaded lot photographs and guidance assets. The offline database technology and media-storage provider remain unselected.
-- **ML assistance:** the three proposed functions would suggest material categories, estimate/predict prices and recommend suitable authorised recyclers. Collectors would confirm categories; estimates would remain distinct from offers and agreed sale amounts. Authorisation checks would be a participation requirement, not an ML prediction. No ML-based speech recognition, voice translation or additional AI functions are proposed.
-- **Participant records:** recyclers would submit offers and acknowledge receipt through the backend. Aggregators would combine lots while preserving source-lot links and each collector's quantity and payment records. Repair shops would participate in the reuse route for suitable electronics.
-- **Traceability:** handover references would link the source lots, recipient, confirmed quantities and acknowledgements. Payment records would separately capture cash or optional digital payments and their confirmation status. A recorded agreement or handover would not automatically mark a payment as confirmed.
+## Responsibility boundaries
 
-Related documents: [Project overview](../README.md) · [Data plan](data-plan.md).
+| Component | Responsibility |
+| --- | --- |
+| Collector interface | Photo capture, manual category confirmation, offer review and access to the collector's own receipts. |
+| Recycler interface | Publish offers, declare accepted materials and quantities, acknowledge receipt and record payment claims. |
+| Local storage and queue | Save drafts and photos, show pending status and retry uploads without creating duplicate lots. |
+| Backend | Enforce ownership, roles, offer expiry, transaction transitions and validation. Client-side labels alone cannot authorise a change. |
+| Participant review | Keep the registration source, reviewer, check date, facility identity and material scope. Unchecked or suspended buyers cannot receive new matched transactions. |
+| Decision support | Filter eligible buyers first, then compare relevant offers. Registration is checked against records, never predicted by a model. |
+| PostgreSQL | Store participants, lot references, offer versions, accepted terms, acknowledgements, payment events and change history. |
+| Media storage | Store lot photos and guidance assets separately, with access tied to the relevant account and transaction. |
+
+PostgreSQL is the planned central database. The client framework, local database, hosting provider and media service remain implementation choices. No deployed integrations are claimed.
+
+## Offline behaviour
+
+Offline support is for capture and access to previously downloaded records. Publishing a lot, accepting a live offer and confirming a shared transaction require server acknowledgement.
+
+1. Assign each local draft a stable identifier before its first upload.
+2. Save edits and photo references locally. Show whether a record is saved on the device, uploading, synced or needs attention.
+3. Retry an upload with the same identifier. The server must recognise it as the same operation.
+4. Keep a version number for shared records. If the server has newer terms, show the conflict for review rather than silently replacing an accepted quantity or price.
+5. Record device event time and server receipt time separately. An offline entry does not become a jointly confirmed receipt merely because it has a timestamp.
+
+Cached prices and offers carry their last-updated time. Expired or offline offers cannot be accepted until refreshed. A lost device may lose unsynced drafts; recovery and local-data protection need testing on the chosen client platform.
+
+## Transaction integrity
+
+Lot, handover and payment states are separate. A successful upload does not mark a handover complete; a completed handover does not mark payment received.
+
+Changes to an accepted offer create a new version that the affected parties must acknowledge. Partial acceptance preserves the remaining quantity. Later aggregation must link quantities back to source lots and prevent reuse of already allocated material.
+
+Corrections retain who changed what, when and why. A dispute stays visible until resolved. The [workflow](collector-workflow.md) defines these cases in terms of collector actions.
+
+## Data access and ML boundaries
+
+Participants can access only their own records and the information required for their transactions. Contact details and precise pickup locations are shared only with the relevant participants. Transport encryption, protected media access, controlled reviewer access and a backup/restore check are requirements to verify before a real pilot.
+
+The three planned ML functions are classification, price estimation/prediction and recycler matching. Low-confidence classification falls back to manual confirmation. Sparse price data produces an explicit lack-of-data message. Matching always respects buyer eligibility, whether it uses filters or a trained ranking model.
+
+Hindi/Marathi text, icons and recorded guidance do not require speech recognition or voice translation. Those are outside the current ML scope.

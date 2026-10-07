@@ -1,52 +1,60 @@
 # E-CHAKRA
 
-E-CHAKRA is a proposed platform connecting informal e-waste collectors with authorised recyclers and helping route reusable electronics to repair shops.
+### Helping informal collectors sell e-waste into the formal recycling chain
 
-**Smart India Hackathon 2026 — Problem Statement 229:** *Kabadiwala Connect — Bringing the Informal Collector into the Formal Recycling Chain.*
+A collector needs to know who will buy a lot, what they will receive after transport costs, and when they will be paid. E-CHAKRA brings those decisions into one simple flow: record the material, compare suitable buyers, agree on a handover and keep a receipt.
 
-## Problem and proposed solution
+**Our goal is to increase the supply of e-waste reaching authorised recyclers while making the transaction worthwhile for the collector.**
 
-Informal collectors provide a local collection route for discarded electronics, but participation in the formal recycling chain can be difficult when price information, suitable buyers and handover records are unavailable or hard to access. Language, literacy and intermittent internet access also shape how a useful collection platform should work.
+**Smart India Hackathon 2026 · Team's PS reference: 229**  
+*Kabadiwala Connect — Bringing the Informal Collector into the Formal Recycling Chain*
 
-E-CHAKRA proposes a shared digital process for recording material lots, reviewing prices and offers, finding suitable authorised recyclers, and documenting handovers and payments. Reusable electronics would be directed towards participating repair shops where appropriate. The aim is to make each transaction easier to understand and trace while supporting collectors' existing working practices.
+**Stage: concept and documentation.** The workflow, architecture and validation approach are documented here. A working application, field study and measured results are not yet included. The exact official submission ID is an [open verification item](docs/references.md#problem-statement-reference).
 
-## Intended users
+[Collector workflow](docs/collector-workflow.md) · [Architecture](docs/system-architecture.md) · [Data plan](docs/data-plan.md) · [Validation plan](docs/validation-plan.md) · [Sources](docs/references.md)
 
-- **Informal collectors:** kabadiwalas, waste-pickers and other local collectors recording and selling their lots.
-- **Aggregators:** participants combining multiple lots while retaining each collector's contribution and payment records.
-- **Authorised recyclers:** buyers reviewing available material, providing offers and confirming receipt.
-- **Repair shops:** participants assessing reusable or repairable electronics for an appropriate reuse route.
+## The problem we are working on
 
-## Essential planned features
+Informal collectors already provide a collection network. Our project focuses on the next sale: helping a collector reach a suitable formal buyer without losing time, money or visibility over the transaction.
 
-- **Lot capture:** photographs, collector-confirmed material categories and approximate weight entry. Initial categories are CRTs, LCD panels, PCBs, cables, motors, batteries, magnet-bearing assemblies and mixed plastics.
-- **Price visibility:** historical price information, clearly labelled estimates and comparison of buyer offers. Final sale amounts would be recorded separately.
-- **Recycler matching:** suggestions based on material suitability, location and recycler information, with authorisation details checked before participation.
-- **Documented handovers:** unique references linking lots, participants, confirmed quantities and handover acknowledgements.
-- **Payment records:** cash payments and optional digital payments, with amounts, status and available confirmation recorded against the transaction.
-- **Accessible participation:** Hindi and Marathi interfaces, pictorial navigation, and audio/video safety guidance.
-- **Offline use and incentives:** local lot capture followed by synchronization when connected; referral rewards and incentives for qualifying verified deliveries, with eligibility rules still to be defined.
-- **Aggregator accounting:** combined lots linked back to source lots, preserving individual collectors' quantities and payment records.
+These are the main barriers we want to validate through local interviews:
 
-## Planned collector workflow
+| Collector's question | Proposed response |
+| --- | --- |
+| Who will accept this material and quantity? | Buyers filtered by checked registration details, accepted materials, service area and minimum lot size. |
+| Is this offer worth the trip? | Price, transport responsibility, deductions and payment timing shown together. |
+| What if the buyer changes the weight or price? | Both sides confirm the received quantity and final terms; the original offer stays in the record. |
+| Can I use this with limited connectivity or reading ability? | Offline drafts, pictures, short labels, Hindi and Marathi support, and assisted onboarding. |
 
-```mermaid
-flowchart LR
-    A["Create Lot"] --> B["Confirm Category"]
-    B --> C["Compare Offers"]
-    C --> D["Verified Handover"]
-    D --> E["Lot & Payment Records"]
-```
+## How a transaction would work
 
-Lot capture and manual category confirmation are intended to work offline. Live offers and cloud ML results require connectivity. Handover verification would depend on participant confirmation and supporting records; creating a lot alone would not mark it as delivered or paid.
+1. **Create a lot:** add a photo, confirmed category, condition and approximate quantity.
+2. **Compare offers:** review suitable buyers and expected proceeds after stated costs.
+3. **Arrange the handover:** agree on pickup or drop-off, timing and payment terms.
+4. **Confirm receipt:** both sides acknowledge the accepted quantity and final amount.
+5. **Track payment:** record the amount received and any outstanding balance.
 
-## Current project status
+The [detailed workflow](docs/collector-workflow.md) explains partial acceptance, expired offers, disputes and interrupted connections.
 
-E-CHAKRA is under development at the documentation and planning stage. This repository currently contains project documentation only; the features above are planned, with no application implementation or validated model performance demonstrated here.
+## What the first prototype should prove
 
-ML is limited to **material classification, price estimation/prediction and authorised recycler matching**. Audio/video guidance and language support do not introduce ML-based speech recognition or voice translation. PostgreSQL is planned for structured central data. A separate local database is planned for offline use; its technology remains unselected.
+Start in **one service area with collectors and a small group of checked recyclers**. The first version should demonstrate offline lot capture, manual category confirmation, offer comparison, a confirmed handover and payment records.
 
-## Further documentation
+Matching can start with material, area and quantity filters. Price references can start with dated, reviewed observations. This lets us test whether the transaction works for both sides before a trained model is available.
 
-- [Proposed system architecture](docs/system-architecture.md): logical components, offline capture and connected services.
-- [Data plan](docs/data-plan.md): essential information, intended sources and ongoing validation.
+ML remains planned for material classification, price estimation/prediction and recycler matching, evaluated against those simpler baselines. Estimates will be clearly separated from buyer offers.
+
+Aggregation, repair/refurbishment referrals and referral rewards are later extensions. Aggregation must preserve each collector's share; reuse handovers need separate reporting; rewards need funding and duplicate-claim checks.
+
+## What we want to get right
+
+The design priorities are the collector's net return, usable offline capture, and a record that follows material through each handover. We will assess these through:
+
+- **Recycler deliveries:** distinct kilograms received, without counting intermediate transfers again.
+- **Collector benefit:** proceeds after recorded costs and time taken to receive payment.
+- **Usability:** successful lot creation, assistance required and repeat participation.
+- **Reliability:** rejected, disputed and unresolved transactions alongside successful ones.
+
+A receipt establishes a recorded delivery. Completed recycling needs downstream evidence, and EPR certification follows the official process. The [validation plan](docs/validation-plan.md) defines the measures and the evidence needed before claiming impact.
+
+Project questions and documented feedback can be raised through [GitHub Issues](https://github.com/kartiksingh6734/E-Chakra-/issues). Keep personal contact details and real transaction records out of public issues.
