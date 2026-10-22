@@ -1,0 +1,51 @@
+$ node scripts/run-framework.mjs build
+
+  vinext build  (Vite 8.0.13)
+
+[1/5] analyze client references...
+
+transforming...✓ 242 modules transformed.
+rendering chunks...
+✓ built in 731ms
+[2/5] analyze server references...
+
+transforming...✓ 192 modules transformed.
+rendering chunks...
+✓ built in 254ms
+[3/5] build rsc environment...
+
+transforming...✓ 239 modules transformed.
+rendering chunks...
+computing gzip size...
+✓ built in 641ms
+[4/5] build client environment...
+
+transforming...✓ 2015 modules transformed.
+rendering chunks...
+computing gzip size...
+✓ built in 1.57s
+[5/5] build ssr environment...
+
+transforming...✓ 198 modules transformed.
+rendering chunks...
+computing gzip size...
+✓ built in 475ms
+
+  Route (app)
+  ┌ ? /         
+  ├ λ /api/ec   
+  └ λ /api/media
+
+  λ API  ? Unknown
+
+  ? Some routes could not be classified. vinext currently uses static analysis
+    and cannot detect dynamic API usage (headers(), cookies(), etc.) at build time.
+    Automatic classification will be improved in a future release.
+
+  Build complete. Run `vinext start` to start the production server.
+
+▲ [WARNING] Proxy environment variables detected. We'll use your proxy for fetch requests.
+
+
+
+Exit code: 0

@@ -1,0 +1,31 @@
+$ node tests/integration.mjs
+
+ ⛅️ wrangler 4.92.0
+───────────────────
+Resource location: local 
+
+Use --remote if you want to access the remote instance.
+
+Migrations to be applied:
+┌───────────────────────┐
+│ name                  │
+├───────────────────────┤
+│ 0000_watery_storm.sql │
+└───────────────────────┘
+? About to apply 1 migration(s)
+Your database may not be available to serve requests during the migration, continue?
+🤖 Using fallback value in non-interactive context: yes
+🌀 Executing on local database DB (00000000-0000-4000-8000-000000000000) from ../../../../../tmp/echakra-integration-gifsc3/v3/d1:
+🌀 To execute on your remote database, add a --remote flag to your wrangler command.
+🚣 6 commands executed successfully.
+┌───────────────────────┬────────┐
+│ name                  │ status │
+├───────────────────────┼────────┤
+│ 0000_watery_storm.sql │ ✅     │
+└───────────────────────┴────────┘
+PASS: built API full lot-to-payment journey, retry safety, validation, private media, account isolation, missing identity, origin checks and PWA assets.
+▲ [WARNING] Proxy environment variables detected. We'll use your proxy for fetch requests.
+
+
+
+Exit code: 0

@@ -4,7 +4,7 @@
 
 The test that matters is whether a collector can complete a worthwhile sale and whether the material reaches the intended recycler. Screen count, downloads and model accuracy alone will not answer that.
 
-This is a proposed plan. No interviews, recruited partners, completed transactions, usability scores or financial results are claimed in this repository.
+This is a proposed field-validation plan. A functional prototype and automated evidence now exist: see [implementation status](requirements.md) and [tests](testing.md). The presentation links research artefacts, but no reviewed interview counts, verified partners, real transactions, usability scores or financial outcomes are established here.
 
 ## Start by checking the assumptions
 
@@ -20,15 +20,15 @@ Ask recyclers what they actually buy, minimum lot sizes, inspection and weighing
 | --- | --- | --- |
 | Discovery | Check the official PS brief, interview participants and review buyer eligibility. | Anonymised notes, a bounded service area and an agreed initial material catalogue. |
 | Interface prototype | Walk through lot capture, offer comparison, handover and payment screens using labelled example data. | Users can explain the offer terms and distinguish “received” from “paid”. |
-| Functional demonstration | Build the core flow and offline sync once implementation begins. | The demonstration cases below work and errors are recorded. |
+| Functional demonstration | Core flow and offline mechanisms implemented; device acceptance remains. | The demonstration cases below work and errors are recorded. |
 | Supervised pilot | Observe real transactions with consenting participants and checked recipients. | Reconciled quantities, payments, support effort, failures and repeat use. |
 | Expansion | Consider aggregation, reuse referrals, more languages/areas and evaluated ML. | The core transaction works reliably and the next route has suitable participants and a support owner. |
 
-Hindi and Marathi remain planned language options. Test wording with speakers in the selected area; use the locally relevant language first. Recorded instructions and assisted onboarding are design options to test, not evidence that literacy barriers have been solved.
+Hindi, Marathi and English UI copy is implemented. Test wording with speakers in the selected area; use the locally relevant language first. Recorded instructions and assisted onboarding are design options to test, not evidence that literacy barriers have been solved.
 
 ## Demonstration acceptance checks
 
-These are acceptance criteria for the future prototype, not completed tests:
+These include current checks and future acceptance criteria. Consult [testing](testing.md) for actual passes and [requirements](requirements.md) for unsupported functions; the list itself does not claim completion:
 
 - Create and reopen a draft without internet. Restore connectivity and retry the same upload; exactly one lot should appear.
 - Compare two offers with different transport costs and payment timings. Ask the participant to explain the choice.
@@ -81,8 +81,8 @@ If referrals are introduced, set a funding limit, define a qualifying delivery a
 
 - Exact official problem statement ID, title and edition, checked against the submission portal or issued brief.
 - Team details and responsibilities, confirmed by the people named.
-- A walkthrough of the actual prototype when it exists, labelled with its current limitations.
+- A current recording of the actual prototype, labelled with commit/device and limitations; the [written walkthrough](demo.md) is available now.
 - Consented discovery notes, buyer eligibility checks and a documented material scope.
 - Measured results with sample sizes, dates and failures, rather than projected outcomes presented as achievements.
 
-These items are outstanding work. Documentation makes the proposal clearer; it cannot substitute for them.
+The evidence gaps above remain outstanding. Runnable source and automated checks are now included; field outcomes and device acceptance must still be observed and recorded.

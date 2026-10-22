@@ -1,8 +1,16 @@
-import {spawn} from 'node:child_process';
+import {spawn,spawnSync} from 'node:child_process';
+import {tmpdir} from 'node:os';
+import {join} from 'node:path';
+import {createServer} from 'node:net';
 import assert from 'node:assert/strict';
-import {readFile} from 'node:fs/promises';
-const root=process.cwd();const port=8794,base='http://127.0.0.1:'+port;
-const server=spawn(process.execPath,['--import','./scripts/sites-env.mjs','./node_modules/wrangler/bin/wrangler.js','dev','--config','dist/server/wrangler.json','--local','--persist-to','.wrangler/state','--ip','127.0.0.1','--port',String(port),'--inspector-port','0'],{cwd:root,stdio:['ignore','pipe','pipe']});
+import {readFile,mkdtemp,rm} from 'node:fs/promises';
+const root=process.cwd();
+const state=await mkdtemp(join(tmpdir(),'echakra-integration-'));
+const migration=spawnSync(process.execPath,['scripts/migrate-local.mjs','--persist-to',state],{cwd:root,stdio:'inherit'});
+if(migration.status!==0){await rm(state,{recursive:true,force:true});throw new Error('Fresh database migration failed');}
+const port=await new Promise((resolve,reject)=>{const probe=createServer();probe.once('error',reject);probe.listen(0,'127.0.0.1',()=>{const port=probe.address().port;probe.close(()=>resolve(port))})});
+const base='http://127.0.0.1:'+port;
+const server=spawn(process.execPath,['--import','./scripts/sites-env.mjs','./node_modules/wrangler/bin/wrangler.js','dev','--config','dist/server/wrangler.json','--local','--persist-to',state,'--ip','127.0.0.1','--port',String(port),'--inspector-port','0'],{cwd:root,stdio:['ignore','pipe','pipe']});
 let logs='';server.stdout.on('data',b=>logs+=b);server.stderr.on('data',b=>logs+=b);
 const sleep=ms=>new Promise(r=>setTimeout(r,ms));
 async function req(path,body,owner='integration-owner',method){
@@ -36,4 +44,10 @@ try{
  const page=await fetch(base+'/');assert.equal(page.status,200);assert.match(await page.text(),/E-CHAKRA/);
  for(const path of ['/manifest.webmanifest','/sw.js','/icon-192.png','/icon-512.png'])assert.equal((await fetch(base+path)).status,200,path);
  console.log('PASS: built API full lot-to-payment journey, retry safety, validation, private media, account isolation, missing identity, origin checks and PWA assets.');
-}finally{server.kill('SIGTERM')}
+}finally{
+ const closed=new Promise(resolve=>server.once('close',resolve));
+ server.kill('SIGTERM');
+ const timeout=setTimeout(()=>server.kill('SIGKILL'),5000);timeout.unref();
+ await closed;clearTimeout(timeout);
+ await rm(state,{recursive:true,force:true});
+}

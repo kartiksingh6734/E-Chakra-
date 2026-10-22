@@ -1,0 +1,32 @@
+name: Prototype bug
+description: Report a reproducible E-CHAKRA prototype issue using synthetic data.
+title: '[Bug] '
+body:
+  - type: markdown
+    attributes:
+      value: 'Please do not include real collector details, receipts, locations, credentials or security exploit details in a public issue.'
+  - type: textarea
+    id: environment
+    attributes:
+      label: Version and environment
+      description: Commit or branch, device/browser, language and whether online or offline.
+    validations:
+      required: true
+  - type: textarea
+    id: reproduce
+    attributes:
+      label: Steps to reproduce
+      description: Use the synthetic inputs from docs/demo.md where possible.
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected and actual behaviour
+    validations:
+      required: true
+  - type: textarea
+    id: evidence
+    attributes:
+      label: Sanitised evidence
+      description: Screenshots or logs with private information removed.

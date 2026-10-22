@@ -1,93 +1,100 @@
-# System architecture
+# Implemented system architecture
 
-[Project overview](../README.md) · [Collector workflow](collector-workflow.md) · [Data plan](data-plan.md)
+[Home](../README.md) · [Workflow](collector-workflow.md) · [API](api.md) · [Security](../SECURITY.md)
 
-This is the proposed design for the first prototype. The diagram separates five responsibilities; it does not imply five separately deployed services. A single backend with clear modules is sufficient for the initial pilot.
-
-## Components and data flow
+One responsive application and one Worker API support the prototype. These five layers describe responsibilities, not five independently deployed services. Solid connections are implemented paths. Planned integrations are listed separately.
 
 ```mermaid
-flowchart TB
-    subgraph UI["1. Participant interfaces"]
-        C["Collector interface"]
-        R["Recycler interface"]
+flowchart TD
+    subgraph L1["1. Interface"]
+        UI["Collector PWA and recycler demo"]
     end
-    subgraph LOCAL["2. Offline capture on the collector device"]
-        D["Local drafts and photos"]
-        Q["Pending sync queue"]
+    subgraph L2["2. Device storage"]
+        IDB["IndexedDB drafts and media"]
+        SW["Service worker and cached shell"]
     end
-    subgraph CORE["3. Application services"]
-        API["Backend API and access checks"]
-        CHECK["Participant and material eligibility"]
-        TX["Lots, offers, handovers and payments"]
+    subgraph L3["3. API boundary"]
+        API["Worker API and owner scope"]
     end
-    subgraph ASSIST["4. Decision support"]
-        FILTER["Material, area and quantity filters"]
-        ML["Optional ML assistance"]
+    subgraph L4["4. Workflow rules"]
+        RULES["Offers, handovers and payments"]
     end
-    subgraph STORE["5. Central storage"]
-        DB[("PostgreSQL")]
-        MEDIA[("Media storage")]
+    subgraph L5["5. Persistent storage"]
+        DB[("D1 SQLite records")]
+        MEDIA[("R2 photos and audio")]
     end
-    C <--> D
-    D --> Q
-    Q -->|"When connected"| API
-    C <-->|"Online requests and sync results"| API
-    R <--> API
-    API --> CHECK
-    CHECK --> TX
-    TX --> FILTER
-    FILTER -.-> ML
-    TX <--> DB
-    CHECK <--> DB
+    UI <--> IDB
+    SW --> UI
+    IDB -->|"Foreground upload"| API
+    UI <-->|"Online actions"| API
+    API --> RULES
+    RULES <-->|"Versioned lot update"| DB
     API <--> MEDIA
-    classDef device fill:#eff6ff,stroke:#2563eb,color:#0f172a
-    classDef service fill:#ecfdf5,stroke:#15803d,color:#0f172a
-    class C,R,D,Q device
-    class API,CHECK,TX,FILTER,DB,MEDIA service
+    API <-->|"Profiles and media metadata"| DB
 ```
 
-Solid arrows show the main path. The dotted connection is a later ML extension. Aggregator and repair/refurbishment interfaces will use the same access-controlled backend when those workflows are introduced.
+## Components
 
-## Responsibility boundaries
+| Component | Implementation | Purpose |
+| --- | --- | --- |
+| Interface | [React/TypeScript](../prototype/app/collector-app.tsx), [Tailwind/CSS](../prototype/app/globals.css) | Responsive interface and three-language copy |
+| Offline storage | [IndexedDB](../prototype/lib/offline.ts) | Persist drafts and attachment blobs before upload |
+| App shell | [Service worker](../prototype/public/sw.js), [manifest](../prototype/public/manifest.webmanifest) | Cache shell/assets and expose installation metadata |
+| API | [Vinext routes](../prototype/app/api/ec/route.ts) on a Worker | One server surface with validated inputs |
+| Rules | [TypeScript domain](../prototype/lib/domain.ts) | Test transitions, expiry and financial invariants separately |
+| Structured records | [D1 schema](../prototype/db/schema.ts), [Drizzle migrations](../prototype/drizzle/) | Scoped lot JSON, versions, profiles and attachment metadata |
+| Media | [R2 API](../prototype/app/api/media/route.ts) | Private binary objects outside database documents |
+| Identity | [ownerOf](../prototype/lib/server.ts) | Trusted hosted owner identity; local development fallback |
 
-| Component | Responsibility |
-| --- | --- |
-| Collector interface | Photo capture, manual category confirmation, offer review and access to the collector's own receipts. |
-| Recycler interface | Publish offers, declare accepted materials and quantities, acknowledge receipt and record payment claims. |
-| Local storage and queue | Save drafts and photos, show pending status and retry uploads without creating duplicate lots. |
-| Backend | Enforce ownership, roles, offer expiry, transaction transitions and validation. Client-side labels alone cannot authorise a change. |
-| Participant review | Keep the registration source, reviewer, check date, facility identity and material scope. Unchecked or suspended buyers cannot receive new matched transactions. |
-| Decision support | Filter eligible buyers first, then compare relevant offers. Registration is checked against records, never predicted by a model. |
-| PostgreSQL | Store participants, lot references, offer versions, accepted terms, acknowledgements, payment events and change history. |
-| Media storage | Store lot photos and guidance assets separately, with access tied to the relevant account and transaction. |
+## Database model
 
-PostgreSQL is the planned central database. The client framework, local database, hosting provider and media service remain implementation choices. No deployed integrations are claimed.
+```mermaid
+erDiagram
+    PROFILES {
+        text owner PK
+        text body
+    }
+    LOTS {
+        text owner PK
+        text id PK
+        text body
+        integer version
+        text updated_at
+    }
+    MEDIA {
+        text id PK
+        text owner
+        text mime
+        text object_key
+        text created_at
+    }
+```
 
-## Offline behaviour
+`lots.body` contains offers, an accepted-offer reference, handover, payments, events and recent operation IDs. Owner relationships and optional attachment references are checked in application code; these tables have no declared SQL foreign keys between them. R2 stores binary objects. A normalized transaction model remains a future migration choice.
 
-Offline support is for capture and access to previously downloaded records. Publishing a lot, accepting a live offer and confirming a shared transaction require server acknowledgement.
+## Transaction consistency
 
-1. Assign each local draft a stable identifier before its first upload.
-2. Save edits and photo references locally. Show whether a record is saved on the device, uploading, synced or needs attention.
-3. Retry an upload with the same identifier. The server must recognise it as the same operation.
-4. Keep a version number for shared records. If the server has newer terms, show the conflict for review rather than silently replacing an accepted quantity or price.
-5. Record device event time and server receipt time separately. An offline entry does not become a jointly confirmed receipt merely because it has a timestamp.
+- Lot creation is idempotent on `(owner, id)`.
+- Mutations carry the last known version and an operation ID. An owner/id/version SQL condition rejects stale writes with HTTP 409.
+- The last 256 mutation IDs are retained: bounded retry detection, not a permanent deduplication ledger.
+- Handover proposal, collector acknowledgement, payment claim and payment acknowledgement are distinct. Only confirmed receipts reduce dues.
+- Each lot update is atomic. R2 upload and D1 metadata insertion are separate; failed metadata insertion triggers object cleanup, not a distributed transaction.
 
-Cached prices and offers carry their last-updated time. Expired or offline offers cannot be accepted until refreshed. A lost device may lose unsynced drafts; recovery and local-data protection need testing on the chosen client platform.
+## Offline boundary
 
-## Transaction integrity
+Open online once. Draft capture, cached records and local media can then be available offline. Publishing, acceptance, handover confirmation, profile updates and payments require a server response. Sync runs on startup, reconnection, manual request and periodic foreground retries; there is no closed-app background sync.
 
-Lot, handover and payment states are separate. A successful upload does not mark a handover complete; a completed handover does not mark payment received.
+API/auth routes are not cached by the service worker. IndexedDB is not encrypted and retains the last owner's cached scope. Offline reload, eviction and shared-device acceptance remain testing work. Use synthetic demo data.
 
-Changes to an accepted offer create a new version that the affected parties must acknowledge. Partial acceptance preserves the remaining quantity. Later aggregation must link quantities back to source lots and prevent reuse of already allocated material.
+## Difference from the presentation
 
-Corrections retain who changed what, when and why. A dispute stays visible until resolved. The [workflow](collector-workflow.md) defines these cases in terms of collector actions.
+| Presentation proposal | Current build | Decision / future gate |
+| --- | --- | --- |
+| React + Tailwind | React + TypeScript + Tailwind | Retained; packaged as a PWA |
+| Node.js + Express | Worker routes through Vinext | One supported deployment; Node remains the build/development runtime |
+| PostgreSQL | D1 SQLite | Bounded hosted persistence; migration/load design required before scale claims |
+| FastAPI + Python ML | Not connected | Requires sourced data, baseline comparison and evaluated models |
+| Google Maps | Text location and synthetic distances | No verified geolocation/routing |
+| Razorpay | External-payment records only | Transfers and payment reconciliation remain separate work |
 
-## Data access and ML boundaries
-
-Participants can access only their own records and the information required for their transactions. Contact details and precise pickup locations are shared only with the relevant participants. Transport encryption, protected media access, controlled reviewer access and a backup/restore check are requirements to verify before a real pilot.
-
-The three planned ML functions are classification, price estimation/prediction and recycler matching. Low-confidence classification falls back to manual confirmation. Sparse price data produces an explicit lack-of-data message. Matching always respects buyer eligibility, whether it uses filters or a trained ranking model.
-
-Hindi/Marathi text, icons and recorded guidance do not require speech recognition or voice translation. Those are outside the current ML scope.
+Independent authentication, checked buyer onboarding and operational dispute resolution must precede a real pilot. The diagram does not imply those are implemented.

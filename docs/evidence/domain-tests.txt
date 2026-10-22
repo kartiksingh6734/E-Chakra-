@@ -1,0 +1,23 @@
+$ node --experimental-transform-types --test tests/domain.test.mjs
+(node:39) ExperimentalWarning: Transform Types is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ complete journey keeps handover, paid claims and confirmed cash separate (2.842762ms)
+✔ retries do not duplicate payments (0.403301ms)
+✔ stale updates cannot overwrite confirmed state (1.365667ms)
+✔ money cannot be recorded before handover or beyond outstanding amount (0.526096ms)
+✔ role and expiry rules are enforced by the domain (0.357381ms)
+✔ repair offers are limited to reusable supported material (0.228486ms)
+✔ piece quantities and invalid amounts are rejected (0.497783ms)
+✔ transport deductions determine net proceeds and nonpositive sample offers are excluded (0.232432ms)
+✔ issues preserve history and halt confirmation (0.369069ms)
+✔ UPI requires an external reference and does not trigger a payment (0.465535ms)
+ℹ tests 10
+ℹ suites 0
+ℹ pass 10
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 149.660603
+
+Exit code: 0
