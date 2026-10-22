@@ -1,0 +1,13 @@
+.DS_Store
+node_modules/
+.env
+.env.*
+!.env.example
+*.log
+*.tsbuildinfo
+prototype/dist/
+prototype/.wrangler/
+prototype/.sites-runtime/
+prototype/.vinext/
+prototype/.next/
+tmp/

@@ -1,0 +1,102 @@
+{
+  "reviewDate": "2026-10-22",
+  "environment": {
+    "node": "v24.19.0",
+    "pnpm": "11.25.0",
+    "platform": "Linux x86_64"
+  },
+  "dependencies": "Reused previously installed locked prototype dependencies; a fresh internet install is separately checked by GitHub Actions.",
+  "checks": [
+    {
+      "check": "types",
+      "command": [
+        "node",
+        "node_modules/typescript/bin/tsc",
+        "--noEmit"
+      ],
+      "exitCode": 0,
+      "result": "pass",
+      "output": "types.txt"
+    },
+    {
+      "check": "domain",
+      "command": [
+        "node",
+        "--experimental-transform-types",
+        "--test",
+        "tests/domain.test.mjs"
+      ],
+      "exitCode": 0,
+      "result": "pass",
+      "output": "domain-tests.txt"
+    },
+    {
+      "check": "service-worker",
+      "command": [
+        "node",
+        "--check",
+        "public/sw.js"
+      ],
+      "exitCode": 0,
+      "result": "pass",
+      "output": "service-worker.txt"
+    },
+    {
+      "check": "build",
+      "command": [
+        "node",
+        "scripts/run-framework.mjs",
+        "build"
+      ],
+      "exitCode": 0,
+      "result": "pass",
+      "output": "build.txt"
+    },
+    {
+      "check": "api",
+      "command": [
+        "node",
+        "tests/integration.mjs"
+      ],
+      "exitCode": 0,
+      "result": "pass",
+      "output": "api-integration.txt"
+    },
+    {
+      "check": "migration-first",
+      "command": [
+        "node",
+        "scripts/migrate-local.mjs"
+      ],
+      "exitCode": 0,
+      "result": "pass",
+      "output": "migration-first.txt"
+    },
+    {
+      "check": "migration-repeat",
+      "command": [
+        "node",
+        "scripts/migrate-local.mjs"
+      ],
+      "exitCode": 0,
+      "result": "pass",
+      "output": "migration-repeat.txt"
+    },
+    {
+      "check": "documentation",
+      "command": [
+        "node",
+        "scripts/check-docs.mjs"
+      ],
+      "exitCode": 0,
+      "result": "pass",
+      "output": "documentation.txt"
+    }
+  ],
+  "notValidated": [
+    "Actual Android installation/camera/microphone/offline reload",
+    "Native-speaker and accessibility acceptance",
+    "Real participant authentication and buyer registration",
+    "Field impact, model performance, load capacity and disaster recovery"
+  ]
+}

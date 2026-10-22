@@ -1,60 +1,64 @@
 # E-CHAKRA
 
-### Helping informal collectors sell e-waste into the formal recycling chain
+![E-CHAKRA: a collector workflow for circular electronics](assets/e-chakra-overview.svg)
 
-A collector needs to know who will buy a lot, what they will receive after transport costs, and when they will be paid. E-CHAKRA brings those decisions into one simple flow: record the material, compare suitable buyers, agree on a handover and keep a receipt.
+**A mobile-first prototype helping informal collectors record e-waste lots, compare buyer offers, confirm handovers and track payment receipts.**
 
-**Our goal is to increase the supply of e-waste reaching authorised recyclers while making the transaction worthwhile for the collector.**
+**Smart India Hackathon 2026 · The Optimist · Team 135129**  
+**PS reference in the team's presentation: 26229 — Kabadiwala Connect.** The issued PS text, organisation and exact portal identifier still need official confirmation; see [problem statement and provenance](docs/problem-statement.md).
 
-**Smart India Hackathon 2026 · Team's PS reference: 229**  
-*Kabadiwala Connect — Bringing the Informal Collector into the Formal Recycling Chain*
+[Judge's guide](docs/judge-guide.md) · [Run locally](docs/setup.md) · [Demonstration](docs/demo.md) · [Requirements](docs/requirements.md) · [Architecture](docs/system-architecture.md) · [Test evidence](docs/testing.md)
 
-**Stage: concept and documentation.** The workflow, architecture and validation approach are documented here. A working application, field study and measured results are not yet included. The exact official submission ID is an [open verification item](docs/references.md#problem-statement-reference).
+[![Verify prototype](https://github.com/kartiksingh6734/E-Chakra-/actions/workflows/verify.yml/badge.svg?branch=main)](https://github.com/kartiksingh6734/E-Chakra-/actions/workflows/verify.yml)
 
-[Collector workflow](docs/collector-workflow.md) · [Architecture](docs/system-architecture.md) · [Data plan](docs/data-plan.md) · [Validation plan](docs/validation-plan.md) · [Sources](docs/references.md)
+## Start reviewing
 
-## The problem we are working on
-
-Informal collectors already provide a collection network. Our project focuses on the next sale: helping a collector reach a suitable formal buyer without losing time, money or visibility over the transaction.
-
-These are the main barriers we want to validate through local interviews:
-
-| Collector's question | Proposed response |
+| Your question | Open this |
 | --- | --- |
-| Who will accept this material and quantity? | Buyers filtered by checked registration details, accepted materials, service area and minimum lot size. |
-| Is this offer worth the trip? | Price, transport responsibility, deductions and payment timing shown together. |
-| What if the buyer changes the weight or price? | Both sides confirm the received quantity and final terms; the original offer stays in the record. |
-| Can I use this with limited connectivity or reading ability? | Offline drafts, pictures, short labels, Hindi and Marathi support, and assisted onboarding. |
+| Does it address the stated problem? | [Problem and scope](docs/problem-statement.md), then the [feature-to-evidence matrix](docs/requirements.md) |
+| What can I try? | [Demo with synthetic inputs](docs/demo.md) |
+| Where is the working code? | [Application](prototype/), [workflow rules](prototype/lib/domain.ts), [API](prototype/app/api/ec/route.ts) |
+| Can I reproduce it? | [Setup](docs/setup.md), [verification commands and results](docs/testing.md) |
+| What is incomplete? | [Limitations and roadmap](docs/limitations.md) |
+| What supports feasibility and impact? | [Feasibility](docs/feasibility.md), [field validation plan](docs/validation-plan.md), [references](docs/references.md) |
 
-## How a transaction would work
+## Current prototype
 
-1. **Create a lot:** add a photo, confirmed category, condition and approximate quantity.
-2. **Compare offers:** review suitable buyers and expected proceeds after stated costs.
-3. **Arrange the handover:** agree on pickup or drop-off, timing and payment terms.
-4. **Confirm receipt:** both sides acknowledge the accepted quantity and final amount.
-5. **Track payment:** record the amount received and any outstanding balance.
+The core journey is **create lot → compare offers → agree handover → confirm payment → keep records**. The interface supports Hindi, Marathi and English. Local drafts can retain photos and voice recordings; the app attempts foreground synchronisation when connectivity returns.
 
-The [detailed workflow](docs/collector-workflow.md) explains partial acceptance, expired offers, disputes and interrupted connections.
+| Available in this build | Boundary |
+| --- | --- |
+| IndexedDB draft queue, PWA manifest and service worker | Open online first; actual Android offline/reload acceptance is pending |
+| Persistent lot records and private photo/audio storage | Hosted demo uses one account's private workspace |
+| Offer comparison, transport deductions and expiry checks | Buyer names, distances and rates are synthetic |
+| Proposed handover terms and collector confirmation | Recycler role switching simulates the counterparty |
+| Partial payments, receipt confirmation, receipts and CSV export | Records external cash/UPI payments; does not transfer money |
+| Issue reporting | Freezes the transaction; staff resolution is not implemented |
 
-## What the first prototype should prove
+Manual category selection and simple eligibility rules are implemented. **Trained AI, live market prices, verified recycler onboarding, independent participant accounts, reward payouts and measured field impact remain future work.** See the [status matrix](docs/requirements.md).
 
-Start in **one service area with collectors and a small group of checked recyclers**. The first version should demonstrate offline lot capture, manual category confirmation, offer comparison, a confirmed handover and payment records.
+## Try it
 
-Matching can start with material, area and quantity filters. Price references can start with dated, reviewed observations. This lets us test whether the transaction works for both sides before a trained model is available.
+[Hosted prototype](https://e-chakra-collector.kartiksingh6734.chatgpt.site) — owner-private; reviewers need a maintainer-led session. An account access prompt is not a public demo login. Local development needs no cloud account or API key.
 
-ML remains planned for material classification, price estimation/prediction and recycler matching, evaluated against those simpler baselines. Estimates will be clearly separated from buyer offers.
+```bash
+git clone https://github.com/kartiksingh6734/E-Chakra-.git
+cd E-Chakra-/prototype
+# Use Node.js 24 and pnpm 11.25.0; see the setup guide.
+pnpm install --frozen-lockfile
+pnpm run build
+pnpm run db:local
+pnpm run dev
+```
 
-Aggregation, repair/refurbishment referrals and referral rewards are later extensions. Aggregation must preserve each collector's share; reuse handovers need separate reporting; rewards need funding and duplicate-claim checks.
+Open `http://localhost:5173`. Follow the [demo guide](docs/demo.md); no customer data is required. `pnpm run verify` checks documentation links, TypeScript, domain tests, the production build and the API using an isolated local database.
 
-## What we want to get right
+## Technical choice
 
-The design priorities are the collector's net return, usable offline capture, and a record that follows material through each handover. We will assess these through:
+**React + TypeScript + Tailwind → Worker API through Vinext → D1 SQLite and R2**, with **IndexedDB + Cache Storage** on the device. This prototype uses D1/Worker in place of the presentation's PostgreSQL/Express proposal. The [architecture](docs/system-architecture.md) explains the decision and planned ML boundary.
 
-- **Recycler deliveries:** distinct kilograms received, without counting intermediate transfers again.
-- **Collector benefit:** proceeds after recorded costs and time taken to receive payment.
-- **Usability:** successful lot creation, assistance required and repeat participation.
-- **Reliability:** rejected, disputed and unresolved transactions alongside successful ones.
+## Evidence and ownership
 
-A receipt establishes a recorded delivery. Completed recycling needs downstream evidence, and EPR certification follows the official process. The [validation plan](docs/validation-plan.md) defines the measures and the evidence needed before claiming impact.
+Executable tests and dated [verification evidence](docs/testing.md) are included. Browser installation, accessibility, camera/microphone and real-device offline checks remain open. Presentation price comparisons are illustrative until supported; they are not measured income gains.
 
-Project questions and documented feedback can be raised through [GitHub Issues](https://github.com/kartiksingh6734/E-Chakra-/issues). Keep personal contact details and real transaction records out of public issues.
+See [team and credits](docs/team-and-credits.md), [contributing](CONTRIBUTING.md), and [security](SECURITY.md). Use synthetic data for demonstrations and issues. A handover receipt is a transaction record, not proof of completed recycling or an EPR certificate.

@@ -1,0 +1,1 @@
+PASS: 215 local link targets across 19 Markdown files. External access and heading fragments require separate review.

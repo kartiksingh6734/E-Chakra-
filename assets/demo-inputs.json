@@ -1,0 +1,15 @@
+{
+  "provenance": "Synthetic demonstration inputs. Not field data or live market prices.",
+  "lot": {
+    "category": "pcb",
+    "condition": "scrap",
+    "quantity": 10,
+    "unit": "kg",
+    "location": "Demo collection point",
+    "notes": "Synthetic SIH review lot; no real sale"
+  },
+  "selectedBuyer": "recycler-a",
+  "handover": {"quantity": 9, "amountINR": 3000, "location": "Demo receiving desk"},
+  "payments": [{"amountINR": 1200, "method": "cash"}, {"amountINR": 1800, "method": "cash"}],
+  "expectedAfterBothCollectorConfirmations": {"receivedINR": 3000, "pendingINR": 0, "stage": "paid"}
+}
