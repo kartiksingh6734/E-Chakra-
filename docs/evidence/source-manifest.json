@@ -130,7 +130,7 @@
     "prototype/scripts/sites-env.sh": "df86ebfc27d2f00860036658e933ac0ddd7b5f6879aa5d51218f0863c7e1fb60",
     "prototype/scripts/verify.mjs": "789a4655467bda6adde60e928814d5fd29f182db32d7313530b3b324cea05726",
     "prototype/tests/domain.test.mjs": "2f7226918cd464da2eff9be21c3342f553b94af038d632c9fc75b23e0830afe6",
-    "prototype/tests/integration.mjs": "57ccc3d3bdf5b2293b890475fae8860505d8c7c62328a6f4a3b2f1d1522fff08",
+    "prototype/tests/integration.mjs": "5ca265011b498dded04d9034e149202bb0930615156177b425316348558a95f1",
     "prototype/tsconfig.json": "7199c6e4e400921e8049729840165a39f1476fa97901bed00239e7697bfe8da4",
     "prototype/vendor/shadcn-tailwind-4.13.0.css": "bc7d83425702955b4cb67cb14ede9d603f9d912376d57a2d81d661094d2a782a",
     "prototype/vite.config.ts": "6f6d890794fbe23f3e35cceb327f49d5977432a5aaf715e040a6408932da395b"
