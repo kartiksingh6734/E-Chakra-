@@ -41,9 +41,12 @@ try{
  const media=await fetch(base+'/api/media?id='+id,{headers:{'oai-authenticated-user-id':'integration-owner'}});assert.equal(media.status,200);assert.equal((await media.arrayBuffer()).byteLength,img.byteLength);
  assert.equal((await req('/api/media?id='+id,null,'other-owner')).status,404);
  const wrongOrigin=await fetch(base+'/api/ec',{method:'POST',headers:{'Content-Type':'application/json','Origin':'https://not-this-app.invalid','oai-authenticated-user-id':'integration-owner'},body:JSON.stringify({action:'profile',profile:{name:'x',location:'Delhi',language:'en'}})});assert.equal(wrongOrigin.status,403);
- const page=await fetch(base+'/');assert.equal(page.status,200);assert.match(await page.text(),/E-CHAKRA/);
+ const page=await fetch(base+'/');const html=await page.text();assert.equal(page.status,200,'Collector page failed: '+html.slice(0,2500));assert.match(html,/E-CHAKRA/);
  for(const path of ['/manifest.webmanifest','/sw.js','/icon-192.png','/icon-512.png'])assert.equal((await fetch(base+path)).status,200,path);
  console.log('PASS: built API full lot-to-payment journey, retry safety, validation, private media, account isolation, missing identity, origin checks and PWA assets.');
+}catch(error){
+ console.error('Local worker output:\n'+logs.slice(-10000));
+ throw error;
 }finally{
  const closed=new Promise(resolve=>server.once('close',resolve));
  server.kill('SIGTERM');

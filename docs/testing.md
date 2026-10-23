@@ -30,6 +30,8 @@ The [CI workflow](../.github/workflows/verify.yml) runs the same command. The wo
 
 The 22 October 2026 review records actual commands and outcomes in [verification.json](evidence/verification.json), with [domain output](evidence/domain-tests.txt), [API output](evidence/api-integration.txt) and [build output](evidence/build.txt). [Source hashes](evidence/source-manifest.json) identify the code/configuration tested. Re-run the checks when those files change.
 
+A [23 October follow-up](evidence/verification-followup.txt) repeated the complete local verification after improving failure diagnostics in the integration harness. No page or API assertion was removed.
+
 The initial local verification reuses installed locked dependencies from the earlier prototype workspace; it is not evidence of a fresh internet dependency installation. GitHub Actions performs its own dependency installation. Neither automated path is a physical-device test or a penetration test.
 
 ## Manual device acceptance
