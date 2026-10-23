@@ -13,6 +13,18 @@ const base='http://127.0.0.1:'+port;
 const server=spawn(process.execPath,['--import','./scripts/sites-env.mjs','./node_modules/wrangler/bin/wrangler.js','dev','--config','dist/server/wrangler.json','--local','--persist-to',state,'--ip','127.0.0.1','--port',String(port),'--inspector-port','0'],{cwd:root,stdio:['ignore','pipe','pipe']});
 let logs='';server.stdout.on('data',b=>logs+=b);server.stderr.on('data',b=>logs+=b);
 const sleep=ms=>new Promise(r=>setTimeout(r,ms));
+async function waitFor200(path){
+ let status='(no response)';
+ for(let i=0;i<20;i++){
+  try{
+   const response=await fetch(base+path);
+   status=response.status;
+   if(response.status===200)return response;
+  }catch(error){status=error instanceof Error?error.message:String(error)}
+  await sleep(250);
+ }
+ throw new Error('Expected '+path+' to return 200 but got '+status+'. '+logs.slice(-2500));
+}
 async function req(path,body,owner='integration-owner',method){
  const r=await fetch(base+path,{method:method||(body?'POST':'GET'),headers:{...(owner?{'oai-authenticated-user-id':owner}:{}),...(body?{'Content-Type':'application/json'}:{})},body:body?JSON.stringify(body):undefined});
  const text=await r.text();let data;try{data=JSON.parse(text)}catch{data=text}return {status:r.status,data};
@@ -41,7 +53,7 @@ try{
  const media=await fetch(base+'/api/media?id='+id,{headers:{'oai-authenticated-user-id':'integration-owner'}});assert.equal(media.status,200);assert.equal((await media.arrayBuffer()).byteLength,img.byteLength);
  assert.equal((await req('/api/media?id='+id,null,'other-owner')).status,404);
  const wrongOrigin=await fetch(base+'/api/ec',{method:'POST',headers:{'Content-Type':'application/json','Origin':'https://not-this-app.invalid','oai-authenticated-user-id':'integration-owner'},body:JSON.stringify({action:'profile',profile:{name:'x',location:'Delhi',language:'en'}})});assert.equal(wrongOrigin.status,403);
- const page=await fetch(base+'/');assert.equal(page.status,200);assert.match(await page.text(),/E-CHAKRA/);
+ const page=await waitFor200('/');assert.match(await page.text(),/E-CHAKRA/);
  for(const path of ['/manifest.webmanifest','/sw.js','/icon-192.png','/icon-512.png'])assert.equal((await fetch(base+path)).status,200,path);
  console.log('PASS: built API full lot-to-payment journey, retry safety, validation, private media, account isolation, missing identity, origin checks and PWA assets.');
 }finally{
