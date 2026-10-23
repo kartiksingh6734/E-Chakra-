@@ -1,0 +1,61 @@
+{
+  "date": "2026-10-23",
+  "base_commit": "a7d2809c72d696f07b9b54d02f61c0d0e40d28ae",
+  "commands": [
+    {
+      "command": "node scripts/verify.mjs",
+      "exit_code": 0,
+      "result": "All repository verification checks passed: local documentation, TypeScript, 10 domain tests, service-worker syntax, original Sites build/API integration, standalone Vite build/Worker integration."
+    },
+    {
+      "command": "pnpm run cloudflare:deploy --dry-run",
+      "exit_code": 0,
+      "result": "Assets and Worker bundled; no deployment or resource creation. Worker gzip size about 26 KiB."
+    }
+  ],
+  "standalone_checks": [
+    "Complete lot-to-offer-to-handover-to-confirmed-payment journey",
+    "Session-cookie persistence; separate sessions and forged identity-header isolation",
+    "Attachment ownership, idempotent upload and 2 MB multi-chunk round trip",
+    "Missing-session, Origin, fetch-metadata, body-size and invalid-input rejection",
+    "Concurrent-safe storage cap enforcement through SQL trigger",
+    "Expired session rejection and scheduled cascade cleanup, using test-only local scheduled middleware route",
+    "Fresh and repeatable migrations; static assets, CSP, manifest and service worker"
+  ],
+  "limitations": [
+    "Tests ran against local Wrangler/Miniflare, using previously installed locked dependencies.",
+    "No Cloudflare account connected, live deployment, subdomain availability or free-plan CPU measurements yet.",
+    "No physical Android or standalone browser acceptance completed.",
+    "Demo role switching and sample prices remain simulated; no real payment execution."
+  ],
+  "sha256": {
+    "docs/cloudflare-deployment.md": "62048397ab77d042062f1bcadae50814c4a3f852f6bdc48d579d7d620afc3246",
+    "prototype/cloudflare/client/_headers": "dcc1f9512016e980c81dd3eeb37c950a144c20f74b75cae17dce1e1b561ca85a",
+    "prototype/cloudflare/client/index.html": "012d8d1a836f6cffa65d4a99d5c1c9c8db892362aeb489720b756ccf4e7e96bc",
+    "prototype/cloudflare/client/main.tsx": "6d30ce3c66e33aeb18ecbdd407580924f724add9bd505a5e981abd0bace8d623",
+    "prototype/cloudflare/media.ts": "87bdb17c0e8ff819bc9e4130223c6dc227a2baf6b803a5d9a38cbeafe0ca0d7e",
+    "prototype/cloudflare/migrations/0001_demo.sql": "859fca307ea65fb490009ffcb5c1485592c3a4ec24f9835ef73bc4e08f58ae60",
+    "prototype/cloudflare/session.ts": "8f8e2638677130d86b543bbe2138ba833b3e96dc9c3ec0d8c15d86fda0537b94",
+    "prototype/cloudflare/worker.ts": "e59983ca1678616be8d1c072cc7bf8c8346190c6146daa4c048e759c9240c78d",
+    "prototype/lib/collector-api.ts": "f2a41ffb1573595867b9e016d5f5b93b9cd91733ff176a35da20d96fbf4e400f",
+    "prototype/lib/http.ts": "0aa5ac58cc9608fc8882b87c827bceda97710963c0c75adfd96e503650cb93b6",
+    "prototype/scripts/configure-cloudflare.mjs": "6737caf7839625b901ae3d925aa489a8ec514dc3534ab173a27c329fc9f28866",
+    "prototype/scripts/deploy-cloudflare.mjs": "6d5bad37fed58a4e00afba6705b4538b0d9f83a0a68d885e87f6bafaa05af7cd",
+    "prototype/tests/cloudflare.integration.mjs": "bec2ff9a0397d19d5bb4f9a5f846e1f709e1bb7fb2396c378aa1f84aa5b4e142",
+    "prototype/vite.cloudflare.config.ts": "1d5770a0d4b757ccc19b9a76c1c6ae0fef0069862a0ec576badfadf54483d6ae",
+    "prototype/wrangler.cloudflare.json": "abb999b65feb77a23e4a72384e7688206164075f08dd1eab48c2a09a4ff9b331",
+    "README.md": "66b7381c1e67836fbe588a80c8518622dcd5199369ce2d0cf82ba7978733c846",
+    "SECURITY.md": "8809536f3d084dba31d6fe0e9465c9ffd5a45e6d6748488338256515d4222399",
+    "docs/setup.md": "8e1581bce4a9c6df5453d9eff0bafd4a70375d7b41bb2cdafd9cf737daf34af0",
+    "docs/system-architecture.md": "7a5b75779f9be2e4925bf105efdfd70d79d6a0cd5b741a8600a8ea57c49a8ccc",
+    "docs/testing.md": "05f19922cb6bceb06db963a45229c370b7e87080d89042c29a37841d29bd1010",
+    "prototype/.gitignore": "4593788ab33d6c661296cc31bcf4c83c976153edea9d7eee2f3f8725732bcb35",
+    "prototype/README.md": "8657f58336b518ce383f0825aef1cbfc2e72ce9042860c4cc03ed1f2a4c18efe",
+    "prototype/app/api/ec/route.ts": "2c571d6a8af3e47cf22cbe0f0d8a98d7f03664476ad63d93c77037ef0e0bd47b",
+    "prototype/app/collector-app.tsx": "7f851cbbcce9ddf745d3381987a7ad60892bb3e1e02f9157dded2d058351a03e",
+    "prototype/app/globals.css": "9a48f261fe942d38b209c84c22d428092d2776a0966c2868b1e70dd0907eb8c6",
+    "prototype/lib/server.ts": "fd69c4ea804d45de8db66b8deb9fb903b9076d8f9b8adfac642e6d22b40cff26",
+    "prototype/package.json": "37bf93f3b1effc2d4606e463b630ca142f392bc0d030804e36b2eb3eab660fb6",
+    "prototype/scripts/verify.mjs": "8eb25b88ac2c437bc7dc268bb3f96e64689d5d5d721e827763eabbf634ea1293"
+  }
+}

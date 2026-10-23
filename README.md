@@ -41,6 +41,8 @@ Manual category selection and simple eligibility rules are implemented. **Traine
 
 [Hosted prototype](https://e-chakra-collector.kartiksingh6734.chatgpt.site) — owner-private; reviewers need a maintainer-led session. An account access prompt is not a public demo login. Local development needs no cloud account or API key.
 
+A [standalone Cloudflare deployment option](docs/cloudflare-deployment.md) now supports a separate judge demo with browser sessions, persistent records and capped uploads. The proposed `workers.dev` address requires account setup and deployment; it is not yet advertised as live. No private hosted records are copied by this option.
+
 ```bash
 git clone https://github.com/kartiksingh6734/E-Chakra-.git
 cd E-Chakra-/prototype
@@ -56,6 +58,8 @@ Open `http://localhost:5173`. Follow the [demo guide](docs/demo.md); no customer
 ## Technical choice
 
 **React + TypeScript + Tailwind → Worker API through Vinext → D1 SQLite and R2**, with **IndexedDB + Cache Storage** on the device. This prototype uses D1/Worker in place of the presentation's PostgreSQL/Express proposal. The [architecture](docs/system-architecture.md) explains the decision and planned ML boundary.
+
+The optional Cloudflare build serves the same React interface as static assets and reuses the same workflow rules behind a standalone Worker. Its small demo attachments use capped D1 storage so R2 billing activation is unnecessary.
 
 ## Evidence and ownership
 

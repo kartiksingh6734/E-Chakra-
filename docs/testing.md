@@ -25,6 +25,7 @@ The [CI workflow](../.github/workflows/verify.yml) runs the same command. The wo
 | Media | Upload and read back a synthetic PNG with an owner check |
 | PWA assets | Root, manifest, service worker and icons return successfully; worker syntax checked |
 | Documentation | Local link targets resolve; external link access and heading fragments remain separate review |
+| Standalone Cloudflare | Static client build plus [integration harness](../prototype/tests/cloudflare.integration.mjs): full transaction journey, session persistence/isolation, untrusted-header rejection, 2 MB chunk round trip, upload ownership, Origin checks, body limits, storage caps, migration repeatability and expiry cleanup |
 
 ## Dated local evidence
 
@@ -33,6 +34,8 @@ The 22 October 2026 review records actual commands and outcomes in [verification
 A [23 October follow-up](evidence/verification-followup.txt) repeated the complete local verification after improving failure diagnostics in the integration harness. No page or API assertion was removed.
 
 The initial local verification reuses installed locked dependencies from the earlier prototype workspace; it is not evidence of a fresh internet dependency installation. GitHub Actions performs its own dependency installation. Neither automated path is a physical-device test or a penetration test.
+
+The [Cloudflare preparation report](evidence/cloudflare-verification.json) records the 23 October standalone build and integration checks. Both deployment modes passed the combined verification command. Cloudflare account setup, live deployment and physical-device acceptance remain pending.
 
 ## Manual device acceptance
 

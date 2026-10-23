@@ -38,3 +38,7 @@ Verification covers documentation links, types, 10 domain tests, service-worker 
 | [tests/](tests/) | Domain and compiled-API checks |
 
 The app is a PWA, not a native APK. Synthetic buyers/rates and a single-owner role switch are deliberate demo boundaries. Manual category selection is not AI inference; payment records do not move funds. See [security](../SECURITY.md) before adapting the hosted identity mechanism.
+
+## Standalone Cloudflare option
+
+For a separate free-hosted judge demo without ChatGPT login, use the [Cloudflare guide](../docs/cloudflare-deployment.md). `cloudflare:build`, `cloudflare:db:local` and `cloudflare:dev` run the standalone mode locally. `cloudflare:test` covers its sessions, uploads and complete transaction journey. The ordinary `verify` command checks both modes. Deployment requires the team's Cloudflare account and a dedicated D1 database; it does not migrate the private hosted data.

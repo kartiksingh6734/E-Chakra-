@@ -54,6 +54,8 @@ Production requires trusted server-supplied identity. Do not expose the built Wo
 
 The maintained hosted app is owner-private. Repository visibility does not grant app access. Arrange a maintainer-led review or run locally. No deployment or sharing change is performed by the CI workflow.
 
+The [standalone Cloudflare guide](cloudflare-deployment.md) describes a separate public judge-demo build with its own browser-session adapter and D1 database. Use that Worker entry point, not the trusted-header Sites entry point, for standalone hosting. `verify` also builds and integration-tests this alternative.
+
 ## Offline / install testing
 
 The development server intentionally does not register the production service worker. Use the installed/hosted production build for the manual Android offline and installation checklist in [testing](testing.md#manual-device-acceptance). Open online once, wait for caching, then test without connectivity. Keeping the app open is required for sync.

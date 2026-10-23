@@ -46,3 +46,7 @@ next-env.d.ts
 /.codex/
 /outputs/
 /work/
+
+# Standalone Cloudflare build and account-specific deployment settings
+dist-cloudflare/
+wrangler.cloudflare.local.json
