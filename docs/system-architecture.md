@@ -4,6 +4,8 @@
 
 One responsive application and one Worker API support the prototype. These five layers describe responsibilities, not five independently deployed services. Solid connections are implemented paths. Planned integrations are listed separately.
 
+The diagram and database model below describe the original Sites deployment. The [standalone Cloudflare option](cloudflare-deployment.md) reuses the interface, [collector service](../prototype/lib/collector-api.ts) and domain rules, with [browser-session authentication](../prototype/cloudflare/session.ts) and [capped D1 attachment storage](../prototype/cloudflare/media.ts). Its [separate schema](../prototype/cloudflare/migrations/0001_demo.sql) adds sessions and media chunks with cascading expiry cleanup; no R2 binding is required.
+
 ```mermaid
 flowchart TD
     subgraph L1["1. Interface"]

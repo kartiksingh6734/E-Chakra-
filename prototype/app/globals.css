@@ -31,3 +31,5 @@ h1,h2,h3,p{margin:0}h1{font-size:clamp(1.6rem,3vw,2rem);font-weight:750;letter-s
 @media(max-width:360px){.app-header{padding:0 11px}.app-layout{padding-left:12px;padding-right:12px}.header-tools{gap:5px}.brand small{display:none}.brand{gap:6px}.capture-icon{display:none}.tag{white-space:normal}.grid-2{grid-template-columns:1fr}.price-grid{grid-template-columns:1fr 1fr}.bottom-nav button{font-size:.71rem}}
 @media(prefers-reduced-motion:reduce){*{scroll-behavior:auto!important;transition:none!important;animation:none!important}}
 
+
+.public-demo-note{display:flex;align-items:flex-start;gap:10px;border:1px solid #bdded9;background:#e9f6f3;color:#285b55;border-radius:12px;padding:12px 15px;margin-bottom:20px;font-size:.82rem;line-height:1.5}.public-demo-note svg{margin-top:2px}

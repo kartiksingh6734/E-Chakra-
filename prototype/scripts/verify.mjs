@@ -9,6 +9,8 @@ const checks = [
   ['Service worker syntax', ['--check', 'public/sw.js']],
   ['Production build', ['scripts/run-framework.mjs', 'build']],
   ['Fresh-database API integration', ['tests/integration.mjs']],
+  ['Standalone Cloudflare client build', ['node_modules/vite/bin/vite.js', 'build', '--config', 'vite.cloudflare.config.ts']],
+  ['Standalone Cloudflare integration', ['tests/cloudflare.integration.mjs']],
 ];
 for (const [label, args] of checks) {
   console.log('\nChecking: ' + label);

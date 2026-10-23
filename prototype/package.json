@@ -16,7 +16,13 @@
     "test": "node --experimental-transform-types --test tests/domain.test.mjs",
     "test:integration": "node tests/integration.mjs",
     "db:local": "node scripts/migrate-local.mjs",
-    "verify": "node scripts/verify.mjs"
+    "verify": "node scripts/verify.mjs",
+    "cloudflare:build": "vite build --config vite.cloudflare.config.ts",
+    "cloudflare:dev": "wrangler dev --config wrangler.cloudflare.json --local",
+    "cloudflare:db:local": "wrangler d1 migrations apply DB --config wrangler.cloudflare.json --local",
+    "cloudflare:test": "node tests/cloudflare.integration.mjs",
+    "cloudflare:configure": "node scripts/configure-cloudflare.mjs",
+    "cloudflare:deploy": "node scripts/deploy-cloudflare.mjs"
   },
   "dependencies": {
     "@base-ui/react": "^1.7.0",
