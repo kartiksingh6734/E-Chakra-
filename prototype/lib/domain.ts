@@ -26,51 +26,166 @@ export interface Profile{name:string;location:string;language:Lang}
 export const money=(n:number)=>new Intl.NumberFormat('en-IN',{style:'currency',currency:'INR',maximumFractionDigits:2}).format(n);
 export const categoryOf=(id:Material)=>CATEGORIES.find(c=>c.id===id)!;
 export const selectedOffer=(lot:Lot)=>lot.offers.find(o=>o.id===lot.acceptedOfferId);
-export const offerTotal=(lot:Pick<Lot,'quantity'>,o:Offer)=>Math.max(0,Math.round((lot.quantity*o.rate-o.charge)*100)/100);
-export const received=(lot:Lot)=>lot.payments.filter(p=>p.confirmedAt).reduce((s,p)=>s+p.amount,0);
-export const pending=(lot:Lot)=>['received','paid','disputed'].includes(lot.stage)&&lot.handover?.confirmedAt?Math.max(0,Math.round((lot.handover.amount-received(lot))*100)/100):0;
+const paise = (rupees: number) => Math.round(rupees * 100);
+
+export function offerTotal(lot: Pick<Lot, 'quantity'>, offer: Offer): number {
+ const hundredths = Math.round(lot.quantity * 100);
+ const ratePaise = paise(offer.rate);
+ // Quantities entered by the collector form and whole-paise rates can be
+ // multiplied exactly before rounding the quoted price to the nearest paisa.
+ if (hundredths / 100 === lot.quantity && ratePaise / 100 === offer.rate &&
+     paise(offer.charge) / 100 === offer.charge) {
+  return Math.max(0, Math.round(hundredths * ratePaise / 100) - paise(offer.charge)) / 100;
+ }
+ // Older lots and API clients can contain higher-precision quantities or rates.
+ return Math.max(0, Math.round((lot.quantity * offer.rate - offer.charge) * 100)) / 100;
+}
+
+
+function paymentTotal(lot: Lot, confirmedOnly: boolean) {
+ return lot.payments.reduce((sum, payment) =>
+  sum + (!confirmedOnly || payment.confirmedAt ? paise(payment.amount) : 0), 0);
+}
+
+export const received = (lot: Lot) => paymentTotal(lot, true) / 100;
+export const pending = (lot: Lot) => lot.handover?.confirmedAt
+ ? Math.max(0, paise(lot.handover.amount) - paymentTotal(lot, true)) / 100 : 0;
+export const unrecordedBalance = (lot: Lot) => lot.handover?.confirmedAt
+ ? Math.max(0, paise(lot.handover.amount) - paymentTotal(lot, false)) / 100 : 0;
 export function validBuyer(lot:Pick<Lot,'category'|'condition'>,buyerId:string){const b=BUYERS.find(b=>b.id===buyerId);return !!b&&(b.kind==='recycler'||(lot.condition==='reusable'&&['lcd','motors','pcb'].includes(lot.category)))}
 export class DomainError extends Error{constructor(message:string,public status=400){super(message)}}
-const requireValue=(v:unknown,message:string)=>{if(!v)throw new DomainError(message)};
-export function mutateLot(original:Lot,input:Record<string,unknown>,now=new Date()):Lot{
- const lot:Lot=structuredClone(original);const action=String(input.action);const role=input.role as Role;
- const opId=String(input.opId||'');requireValue(/^[\w-]{8,80}$/.test(opId),'Invalid operation reference');
- if(lot.operations.includes(opId))return lot;
- requireValue(role==='collector'||role==='recycler','Select a valid role');
- if(Number(input.version)!==lot.version)throw new DomainError('This lot changed. Refresh and try again.',409);
- const at=now.toISOString();
- const number=(value:unknown,max:number)=>{const n=Number(value);requireValue(Number.isFinite(n)&&n>0&&n<=max,'Enter a valid positive amount or quantity');return n};
- const text=(value:unknown,max=200)=>String(value||'').trim().slice(0,max);
- switch(action){
- case 'sample_offers':{
- requireValue(lot.stage==='open','Offers are already closed');requireValue(lot.offers.length===0,'Offers already exist');
- lot.offers=BUYERS.filter(b=>validBuyer(lot,b.id)&&Math.round(categoryOf(lot.category).rate*b.multiplier)*lot.quantity>b.charge).map(b=>({id:crypto.randomUUID(),buyerId:b.id,rate:Math.round(categoryOf(lot.category).rate*b.multiplier),charge:b.charge,pickup:b.pickup,createdAt:at,expiresAt:new Date(now.getTime()+86400000*3).toISOString()}));break}
- case 'create_offer':{
- requireValue(role==='recycler','Switch to the recycler demo role');requireValue(lot.stage==='open','This lot no longer accepts offers');
- const buyerId=String(input.buyerId);requireValue(validBuyer(lot,buyerId),'This buyer does not accept this material for this purpose');
- const rate=number(input.rate,1000000);const charge=Number(input.charge||0);requireValue(Number.isFinite(charge)&&charge>=0&&charge<=rate*lot.quantity,'Invalid transport charge');
- lot.offers=lot.offers.filter(o=>o.buyerId!==buyerId);lot.offers.push({id:crypto.randomUUID(),buyerId,rate,charge,pickup:!!input.pickup,createdAt:at,expiresAt:new Date(now.getTime()+86400000*3).toISOString()});break}
- case 'accept_offer':{
- requireValue(role==='collector','Only the collector can accept an offer');requireValue(lot.stage==='open','This lot already has an accepted offer');
- const o=lot.offers.find(o=>o.id===input.offerId);requireValue(o,'Offer not found');requireValue(Date.parse(o!.expiresAt)>now.getTime(),'This offer has expired');
- lot.acceptedOfferId=o!.id;lot.stage='accepted';break}
- case 'propose_handover':{
- requireValue(role==='recycler','The recycler records the received weight and amount');requireValue(lot.stage==='accepted','Accept an offer before handover');
- const quantity=number(input.quantity,100000);if(categoryOf(lot.category).unit==='piece')requireValue(Number.isInteger(quantity),'Enter a whole number of pieces');
- const amount=Math.round(number(input.amount,100000000)*100)/100;requireValue(amount>=.01,'Amount must be at least 0.01');const location=text(input.location);requireValue(location.length>=2,'Enter the handover location');
- lot.handover={quantity,amount,location,reference:'EC-'+lot.id.slice(0,8).toUpperCase(),createdAt:at};lot.stage='handover';break}
- case 'confirm_handover':requireValue(role==='collector','The collector confirms the handover');requireValue(lot.stage==='handover'&&lot.handover,'No handover is ready');lot.handover!.confirmedAt=at;lot.stage='received';break;
- case 'record_payment':{
- requireValue(role==='recycler','The recycler records the payment');requireValue(lot.stage==='received','Confirm handover before recording payment');
- const amount=Math.round(number(input.amount,100000000)*100)/100;requireValue(amount>=.01,'Amount must be at least 0.01');const remaining=lot.handover!.amount-lot.payments.reduce((s,p)=>s+p.amount,0);
- requireValue(amount<=remaining+.001,'Payment exceeds the unrecorded balance');const method=input.method;requireValue(method==='cash'||method==='upi','Choose cash or UPI');
- const reference=text(input.reference,100);if(method==='upi')requireValue(reference.length>=4,'Enter the external UPI reference');
- lot.payments.push({id:crypto.randomUUID(),amount,method:method as 'cash'|'upi',reference,createdAt:at});break}
- case 'confirm_payment':{
- requireValue(role==='collector','The collector confirms money received');requireValue(lot.stage==='received','Confirm handover first');
- const p=lot.payments.find(p=>p.id===input.paymentId);requireValue(p&&!p.confirmedAt,'Payment already confirmed or missing');p!.confirmedAt=at;if(pending(lot)<=.001)lot.stage='paid';break}
- case 'dispute':requireValue(role==='collector'&&['accepted','handover','received'].includes(lot.stage),'This lot cannot be disputed now');requireValue(text(input.reason).length>=5,'Describe the issue in at least 5 characters');lot.stage='disputed';lot.notes+=(lot.notes?'\n':'')+'Issue: '+text(input.reason);break;
- default:throw new DomainError('Unknown action')
+function requireValue(value: unknown, message: string): asserts value {
+ if (!value) throw new DomainError(message);
+}
+
+function numeric(value: unknown, max: number, allowZero = false): number {
+ const n = typeof value === 'string' && value.trim() ? Number(value) : value;
+ requireValue(typeof n === 'number' && Number.isFinite(n) && n <= max &&
+  (allowZero ? n >= 0 : n > 0), 'Enter a valid amount or quantity');
+ return n;
+}
+
+function currency(value: unknown, max: number, allowZero = false): number {
+ const n = numeric(value, max, allowZero);
+ requireValue(paise(n) / 100 === n, 'Enter an amount in whole paise');
+ return n;
+}
+
+function textField(value: unknown, min: number, max: number, message: string): string {
+ requireValue(typeof value === 'string', message);
+ const result = value.trim();
+ requireValue(result.length >= min && result.length <= max, message);
+ return result;
+}
+
+export function mutateLot(original: Lot, input: Record<string, unknown>, now = new Date()): Lot {
+ const opId = input.opId;
+ requireValue(typeof opId === 'string' && /^[\w-]{8,80}$/.test(opId), 'Invalid operation reference');
+ if (original.operations.includes(opId)) return original;
+ const role = input.role;
+ requireValue(role === 'collector' || role === 'recycler', 'Select a valid role');
+ const version = typeof input.version === 'string' ? Number(input.version) : input.version;
+ if (version !== original.version) throw new DomainError('This lot changed. Refresh and try again.', 409);
+
+ const lot = structuredClone(original);
+ const at = now.toISOString();
+ const action = input.action;
+ switch (action) {
+ case 'sample_offers': {
+  requireValue(lot.stage === 'open', 'Offers are already closed');
+  requireValue(lot.offers.length === 0, 'Offers already exist');
+  lot.offers = BUYERS.filter(buyer => validBuyer(lot, buyer.id)).map(buyer => ({
+   id: crypto.randomUUID(), buyerId: buyer.id,
+   rate: Math.round(categoryOf(lot.category).rate * buyer.multiplier),
+   charge: buyer.charge, pickup: buyer.pickup, createdAt: at,
+   expiresAt: new Date(now.getTime() + 86400000 * 3).toISOString(),
+  })).filter(offer => offerTotal(lot, offer) > 0);
+  requireValue(lot.offers.length, 'No sample offer has a positive net amount for this quantity');
+  break;
  }
- lot.operations.push(opId);lot.operations=lot.operations.slice(-256);lot.events.push({at,action,role});lot.updatedAt=at;lot.version++;return lot;
+ case 'create_offer': {
+  requireValue(role === 'recycler', 'Switch to the recycler demo role');
+  requireValue(lot.stage === 'open', 'This lot no longer accepts offers');
+  const buyerId = input.buyerId;
+  requireValue(typeof buyerId === 'string' && validBuyer(lot, buyerId),
+   'This buyer does not accept this material for this purpose');
+  const rate = currency(input.rate, 1000000);
+  const charge = currency(input.charge === undefined ? 0 : input.charge, rate * lot.quantity, true);
+  const pickup = input.pickup === undefined ? false : input.pickup;
+  requireValue(typeof pickup === 'boolean', 'Choose pickup or dropoff');
+  const offer: Offer = {id: crypto.randomUUID(), buyerId, rate, charge, pickup, createdAt: at,
+   expiresAt: new Date(now.getTime() + 86400000 * 3).toISOString()};
+  requireValue(offerTotal(lot, offer) > 0, 'The offer must have a positive net amount');
+  lot.offers = [...lot.offers.filter(existing => existing.buyerId !== buyerId), offer];
+  break;
+ }
+ case 'accept_offer': {
+  requireValue(role === 'collector', 'Only the collector can accept an offer');
+  requireValue(lot.stage === 'open', 'This lot already has an accepted offer');
+  const offer = lot.offers.find(o => o.id === input.offerId);
+  requireValue(offer, 'Offer not found');
+  requireValue(Date.parse(offer.expiresAt) > now.getTime(), 'This offer has expired');
+  requireValue(offerTotal(lot, offer) > 0, 'The offer must have a positive net amount');
+  lot.acceptedOfferId = offer.id;
+  lot.stage = 'accepted';
+  break;
+ }
+ case 'propose_handover': {
+  requireValue(role === 'recycler', 'The recycler records the received weight and amount');
+  requireValue(lot.stage === 'accepted', 'Accept an offer before handover');
+  const quantity = numeric(input.quantity, 100000);
+  if (categoryOf(lot.category).unit === 'piece') {
+   requireValue(Number.isInteger(quantity), 'Enter a whole number of pieces');
+  }
+  const amount = currency(input.amount, 100000000);
+  const location = textField(input.location, 2, 200, 'Enter a handover location of 2 to 200 characters');
+  lot.handover = {quantity, amount, location, reference: 'EC-' + lot.id.slice(0, 8).toUpperCase(), createdAt: at};
+  lot.stage = 'handover';
+  break;
+ }
+ case 'confirm_handover':
+  requireValue(role === 'collector', 'The collector confirms the handover');
+  requireValue(lot.stage === 'handover' && lot.handover, 'No handover is ready');
+  lot.handover.confirmedAt = at;
+  lot.stage = 'received';
+  break;
+ case 'record_payment': {
+  requireValue(role === 'recycler', 'The recycler records the payment');
+  requireValue(lot.stage === 'received', 'Confirm handover before recording payment');
+  const amount = currency(input.amount, 100000000);
+  requireValue(amount <= unrecordedBalance(lot), 'Payment exceeds the unrecorded balance');
+  const method = input.method;
+  requireValue(method === 'cash' || method === 'upi', 'Choose cash or UPI');
+  const reference = textField(input.reference === undefined ? '' : input.reference,
+   method === 'upi' ? 4 : 0, 100, 'Enter a valid payment reference (4 to 100 characters for UPI)');
+  lot.payments.push({id: crypto.randomUUID(), amount, method, reference, createdAt: at});
+  break;
+ }
+ case 'confirm_payment': {
+  requireValue(role === 'collector', 'The collector confirms money received');
+  requireValue(lot.stage === 'received', 'Confirm handover first');
+  const payment = lot.payments.find(p => p.id === input.paymentId);
+  requireValue(payment && !payment.confirmedAt, 'Payment already confirmed or missing');
+  payment.confirmedAt = at;
+  if (pending(lot) === 0) lot.stage = 'paid';
+  break;
+ }
+ case 'dispute': {
+  requireValue(role === 'collector' && ['accepted', 'handover', 'received'].includes(lot.stage),
+   'This lot cannot be disputed now');
+  const reason = textField(input.reason, 5, 200, 'Describe the issue in 5 to 200 characters');
+  lot.stage = 'disputed';
+  lot.notes += (lot.notes ? '\n' : '') + 'Issue: ' + reason;
+  break;
+ }
+ default:
+  throw new DomainError('Unknown action');
+ }
+
+ lot.operations.push(opId);
+ lot.operations = lot.operations.slice(-256);
+ lot.events.push({at, action, role});
+ lot.updatedAt = at;
+ lot.version++;
+ return lot;
 }
