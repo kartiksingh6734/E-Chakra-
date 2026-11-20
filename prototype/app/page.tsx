@@ -1,2 +1,3 @@
 import CollectorApp from './collector-app';
-export default function Page() { return <CollectorApp />; }
+import { DeviceGate } from './device-data';
+export default function Page() { return <DeviceGate><CollectorApp /></DeviceGate>; }
