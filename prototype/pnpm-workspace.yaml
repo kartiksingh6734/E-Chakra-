@@ -18,4 +18,7 @@ packageImportMethod: auto
 verifyDepsBeforeRun: false
 optimisticRepeatInstall: false
 overrides:
-  miniflare>sharp: 0.35.4
+  sharp@<0.35.5: 0.35.5
+  "@esbuild-kit/core-utils>esbuild": 0.25.12
+  "fflate@>=0.7.0 <0.7.5": 0.7.5
+  "@typescript-eslint/typescript-estree>minimatch": ^11.0.1
