@@ -12,6 +12,8 @@ E-CHAKRA demonstrates a collector's sale from lot capture to payment acknowledge
 
 ## Demonstration review
 
+Watch the collector capture a lot offline, reconnect, confirm a handover and settle two payments in the [desktop Chromium recording](evidence/desktop-chromium/demo.webm).
+
 Follow [the scripted example](demo.md): a synthetic 10 kg PCB lot, compared offers, a final 9 kg / ₹3,000 agreement, two payment claims and two collector confirmations. Observe the balance between confirmations. The recycler role belongs to the same private owner workspace, not a separately authenticated business.
 
 The hosted deployment is owner-private. Use a maintainer-led session or [local setup](setup.md). The presentation links a [team-provided video](https://drive.google.com/file/d/1beBZdxFbpla45hIuDcNdBsqNrNQS-4br/view); access and correspondence to the current code have not been verified. The written script and source are the reproducible fallback.

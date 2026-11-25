@@ -26,16 +26,16 @@ Local drafts are outside this server state machine. A queued draft becomes `open
 3. **Accept:** select a current offer online. Preserve its terms with the lot.
 4. **Review handover:** recycler demo proposes measured quantity, final amount and location; collector confirms or reports an issue.
 5. **Confirm money:** recycler demo records cash or an external UPI reference; collector separately confirms receipt. Partial receipts leave a balance.
-6. **Keep records:** download a text receipt or CSV ledger. Neither is a recycling certificate.
+6. **Keep records:** download a text receipt or a CSV ledger of confirmed handovers. Neither is a recycling certificate.
 
 ## Exceptions and scope
 
 | Situation | Current behaviour |
 | --- | --- |
 | Offline capture | Draft/media waits for foreground sync; device acceptance pending |
-| Duplicate upload | Existing owner/lot record returned |
+| Duplicate upload | A retry returns the existing lot. Identical attachment retries reuse the stored file. |
 | Expired offer | Acceptance rejected |
-| Stale update | HTTP 409; refresh and retry |
+| Stale update or account change | The API returns HTTP 409. Refresh the workspace before retrying. |
 | Changed final terms | Require collector confirmation; no automatic settlement |
 | Partial payment | Only confirmed receipts reduce balance |
 | Overpayment claim | Rejected |

@@ -51,7 +51,7 @@ pnpm run db:local
 pnpm run dev
 ```
 
-Open `http://localhost:5173`. Follow the [demo guide](docs/demo.md); no customer data is required. `pnpm run verify` checks documentation links, TypeScript, domain tests, the production build and the API using an isolated local database.
+Open `http://localhost:5173`. Follow the [demo guide](docs/demo.md); no customer data is required. `pnpm run verify` checks documentation links, lint, TypeScript, regression tests, the production build and the API using an isolated local database.
 
 ## Technical choice
 
@@ -59,6 +59,6 @@ Open `http://localhost:5173`. Follow the [demo guide](docs/demo.md); no customer
 
 ## Evidence and ownership
 
-Executable tests and dated [verification evidence](docs/testing.md) are included. Browser installation, accessibility, camera/microphone and real-device offline checks remain open. Presentation price comparisons are illustrative until supported; they are not measured income gains.
+Executable tests and dated [verification evidence](docs/testing.md) are included. Desktop Chromium evidence covers offline capture, reconnection, split payments and shared-device data clearing. Physical Android installation, camera, microphone and assistive-technology checks remain open. Presentation price comparisons are illustrative until supported; they are not measured income gains.
 
 See [team and credits](docs/team-and-credits.md), [contributing](CONTRIBUTING.md), and [security](SECURITY.md). Use synthetic data for demonstrations and issues. A handover receipt is a transaction record, not proof of completed recycling or an EPR certificate.

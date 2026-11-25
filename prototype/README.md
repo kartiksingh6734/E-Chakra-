@@ -21,7 +21,7 @@ Open `http://localhost:5173`. `db:local` applies migrations locally and can be r
 pnpm run verify
 ```
 
-Verification covers documentation links, types, 10 domain tests, service-worker syntax, build and the API on an isolated fresh local database. Manual installation/camera/offline reload tests remain separate.
+Verification covers documentation links, ESLint, types, regression tests, service-worker syntax, the build and the API on an isolated fresh local database. Manual installation/camera/offline reload tests remain separate.
 
 ## Code map
 

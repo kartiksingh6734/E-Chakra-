@@ -6,6 +6,7 @@ Use synthetic data only. The two roles belong to one owner workspace. Buyer name
 
 ## Access
 
+- [Recorded collector walkthrough](evidence/desktop-chromium/demo.webm) from desktop Chromium at mobile width. It shows a synthetic lot moving from offline capture through payment confirmation.
 - [Hosted prototype](https://e-chakra-collector.kartiksingh6734.chatgpt.site): owner-private, for a maintainer-led session.
 - [Local setup](setup.md): reproducible alternative without a cloud account.
 - [Team-provided presentation video](https://drive.google.com/file/d/1beBZdxFbpla45hIuDcNdBsqNrNQS-4br/view): external access/content not verified; it may show an older design. Do not treat it as test evidence for this revision.
@@ -54,4 +55,4 @@ Expected financial checkpoints:
 
 ## Before presenting
 
-Record the commit shown, device/browser and which checks were actually observed. Ensure the judge can access your chosen demonstration path. A current, public-safe screen recording and actual mobile screenshots still need to be captured; generated mockups are not substitutes for execution evidence.
+Record the commit shown, device/browser and which checks were actually observed. Ensure the judge can access your chosen demonstration path. The [browser verification](testing.md#desktop-chromium-verification) includes a recording and screenshots. Capture physical-device results separately when presenting Android acceptance.

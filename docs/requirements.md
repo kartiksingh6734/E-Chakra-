@@ -8,7 +8,7 @@ This matrix covers the team's presentation and design, pending reconciliation wi
 | --- | --- | --- | --- | --- |
 | R01 | Lot category, condition, quantity and location | Implemented | [UI](../prototype/app/collector-app.tsx), [API](../prototype/app/api/ec/route.ts) | Creation/invalid quantity checked; manual category |
 | R02 | Photo and voice-supported entry | Partial | [Compression](../prototype/lib/offline.ts), [recording](../prototype/app/collector-app.tsx), [media API](../prototype/app/api/media/route.ts) | Image read/write checked; camera/microphone need device tests; no transcription |
-| R03 | Offline capture and synchronisation | Partial | [Queue](../prototype/lib/offline.ts), [service worker](../prototype/public/sw.js), [sync](../prototype/app/collector-app.tsx) | API retry safety checked; complete offline/reload/reconnect test pending; foreground only |
+| R03 | Offline capture and synchronisation | Partial | [Queue](../prototype/lib/offline.ts), [service worker](../prototype/public/sw.js), [sync](../prototype/app/collector-app.tsx) | Desktop Chromium retained offline photo/audio across reload and created one lot after two reconnects. Physical Android acceptance is pending. |
 | R04 | Local-language access | Implemented | [Hindi/Marathi/English](../prototype/lib/i18n.ts) | UI/forms exist; native-speaker review and some English error localisation remain |
 | R05 | AI material identification | Planned | [ML plan](data-plan.md) | Manual categories; no trained model, dataset or accuracy result |
 | R06 | Price discovery / prediction | Simulated | [Sample rates](../prototype/lib/domain.ts), [offers UI](../prototype/app/collector-app.tsx) | Synthetic estimates/offers; no market feed or prediction model |
