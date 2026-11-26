@@ -52,7 +52,7 @@ The API test requires a completed build. The [GitHub workflow](../.github/workfl
 
 Production requires trusted server-supplied identity. Do not expose the built Worker as a public standalone service while trusting a client-provided `oai-authenticated-user-id` header. Replace that adapter with genuine authentication if changing the hosting boundary. See [security](../SECURITY.md).
 
-The public prototype and collector walkthrough are on [GitHub Pages](https://kartiksingh6734.github.io/E-Chakra-/). The local Worker commands above run the D1/R2 version.
+The public prototype and collector walkthrough are on [GitHub Pages](https://kartiksingh6734.github.io/E-Chakra-/). Follow the [Firebase sign-in setup](github-pages.md) to activate Google and SMS verification for the Pages site. The local Worker commands above run the D1/R2 version.
 
 ## Offline / install testing
 
