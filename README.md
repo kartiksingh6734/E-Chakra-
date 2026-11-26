@@ -39,7 +39,7 @@ Manual category selection and simple eligibility rules are implemented. **Traine
 
 ## Try it
 
-[Hosted prototype](https://e-chakra-collector.kartiksingh6734.chatgpt.site) — owner-private; reviewers need a maintainer-led session. An account access prompt is not a public demo login. Local development needs no cloud account or API key.
+Open the **[E-CHAKRA prototype on GitHub Pages](https://kartiksingh6734.github.io/E-Chakra-/)**. Anyone can watch the collector walkthrough. The [local setup](docs/setup.md) also runs without a cloud account or API key.
 
 ```bash
 git clone https://github.com/kartiksingh6734/E-Chakra-.git
