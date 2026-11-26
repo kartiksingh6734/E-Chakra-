@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {mutateLot,pending,received,offerTotal,validBuyer} from '../lib/domain.ts';
+import {mutateLot,pending,received,unrecordedBalance,offerTotal,validBuyer} from '../lib/domain.ts';
 const base=()=>({id:crypto.randomUUID(),category:'pcb',quantity:10,condition:'scrap',location:'Mayapuri, Delhi',notes:'',createdAt:'2026-10-08T10:00:00Z',updatedAt:'2026-10-08T10:00:00Z',stage:'open',offers:[],payments:[],events:[],operations:[],version:1});
 function act(l,action,role='collector',extra={}){return mutateLot(l,{action,role,id:l.id,version:l.version,opId:crypto.randomUUID(),...extra})}
 function handover(){let l=act(base(),'sample_offers');l=act(l,'accept_offer','collector',{offerId:l.offers[0].id});l=act(l,'propose_handover','recycler',{quantity:9.5,amount:3200,location:'Demo facility'});return l}
@@ -51,4 +51,45 @@ test('issues preserve history and halt confirmation',()=>{
 });
 test('UPI requires an external reference and does not trigger a payment',()=>{
  const l=act(handover(),'confirm_handover');assert.throws(()=>act(l,'record_payment','recycler',{amount:1,method:'upi',reference:''}),/reference/);
+});
+
+test('cash totals and available balance stay exact to the last paisa', () => {
+ let lot = handover();
+ lot.handover.amount = 0.30;
+ lot = act(lot, 'confirm_handover');
+ lot = act(lot, 'record_payment', 'recycler', {amount: 0.10, method: 'cash'});
+ assert.equal(unrecordedBalance(lot), 0.20);
+ assert.equal(pending(lot), 0.30);
+ lot = act(lot, 'record_payment', 'recycler', {amount: 0.20, method: 'cash'});
+ assert.equal(unrecordedBalance(lot), 0);
+ lot = act(lot, 'confirm_payment', 'collector', {paymentId: lot.payments[0].id});
+ assert.equal(pending(lot), 0.20);
+ lot = act(lot, 'confirm_payment', 'collector', {paymentId: lot.payments[1].id});
+ assert.equal(received(lot), 0.30);
+ assert.equal(lot.stage, 'paid');
+});
+
+test('offer prices round half a paisa up after multiplying the quantity and rate', () => {
+ assert.equal(offerTotal({quantity: 2.01}, {rate: 0.50, charge: 0}), 1.01);
+ assert.equal(offerTotal({quantity: 2.01}, {rate: 0.50, charge: 0.35}), 0.66);
+ assert.equal(offerTotal({quantity: 1.125}, {rate: 8, charge: 1}), 8);
+});
+
+test('typed financial and text fields reject malformed values before changing state', () => {
+ const lot = act(handover(), 'confirm_handover');
+ for (const amount of [true, [1], 1.005, ' ']) {
+  assert.throws(() => act(lot, 'record_payment', 'recycler', {amount, method: 'cash'}));
+ }
+ assert.throws(() => act(lot, 'record_payment', 'recycler', {amount: 1, method: 'upi', reference: {}}));
+ assert.throws(() => act(lot, 'dispute', 'collector', {reason: {}}));
+ assert.equal(lot.payments.length, 0);
+});
+
+test('custom quotes require a positive net amount and a boolean pickup choice', () => {
+ const lot = base();
+ const quote = {buyerId: 'recycler-a', rate: 0.01, charge: 0.10, pickup: false};
+ assert.throws(() => act(lot, 'create_offer', 'recycler', quote), /positive net/);
+ assert.throws(() => act(lot, 'create_offer', 'recycler', {...quote, charge: 0, pickup: 'false'}), /pickup/);
+ const quoted = act(lot, 'create_offer', 'recycler', {...quote, charge: 0.09});
+ assert.equal(offerTotal(lot, quoted.offers[0]), 0.01);
 });

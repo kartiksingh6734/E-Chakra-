@@ -1,0 +1,23 @@
+.login-shell { min-height: 100vh; background: #edf4f1; color: #15342f; }
+.login-nav, .login-grid { max-width: 920px; margin: auto; padding-inline: clamp(20px, 4vw, 54px); }
+.login-nav { display: flex; align-items: center; justify-content: space-between; padding-block: 22px; }
+.login-nav strong { display: inline-flex; align-items: center; gap: .6em; letter-spacing: .05em; }
+.login-nav svg { color: #087f72; }
+.login-nav select { background: white; color: #163b35; border: 1px solid #a7bcb6; padding: .35rem .7rem; border-radius: 8px; }
+.login-grid { display: grid; grid-template-columns: minmax(0, 1.15fr) minmax(0, .85fr); align-items: center; column-gap: clamp(24px, 5vw, 64px); padding-block: clamp(18px, 5vh, 60px); }
+.login-panel h1 { font: 700 clamp(2.3rem, 5vw, 3.5rem)/1.05 Inter, system-ui, sans-serif; letter-spacing: -.045em; margin: 0 0 1rem; }
+.login-panel > p { color: #45605b; max-width: 38ch; font-size: 1.06rem; }
+.login-status, .login-methods { margin: 1.6rem 0 1rem; padding: 20px; border: 1px solid #ccddd6; background: white; border-radius: 16px; }
+.login-status p { margin: 0 0 .7rem; }
+.login-shell a { color: #006d61; text-decoration: underline; text-underline-offset: .18em; }
+.login-source, .login-preview a { font-size: .9rem; }
+.login-methods form { border-top: 1px solid #dbe5df; margin-top: 16px; padding-top: 16px; gap: 10px; }
+.login-methods input { display: block; margin-top: 6px; background: white; border: 1px solid #869c95; padding: .65rem .8rem; border-radius: 8px; width: 100%; }
+.login-methods small { color: #516660; }
+.login-error { margin-top: 12px; color: #983737; }
+.login-preview { padding: 18px; background: #fff; border-radius: 20px; border: 1px solid #ccddd6; text-align: center; }
+.login-preview h2 { font-size: 1.15rem; margin: 0 0 14px; }
+.login-preview video { display: block; width: 100%; max-height: min(58vh, 500px); aspect-ratio: 390/844; background: #f3f7f8; border-radius: 10px; margin-bottom: .5rem; }
+.account-strip { display: flex; align-items: center; justify-content: flex-end; flex-wrap: wrap; gap: 12px; padding: 5px max(18px,calc((100% - 1120px)/2)); color: #164b43; background: #e4f3ed; font-size: .86rem; }
+.account-strip button { color: inherit; text-decoration: underline; border: 0; background: transparent; padding: .4rem; }
+@media(max-width: 660px) { .login-grid { grid-template-columns: 1fr; gap: 28px; } .login-preview video { max-height: 320px; } }

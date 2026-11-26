@@ -32,7 +32,7 @@ Open `http://localhost:5173`. Local development supplies a demo owner. Select En
 pnpm run verify
 ```
 
-This runs link checks, TypeScript, 10 domain tests, service-worker syntax validation, the production build and the built API integration test. The integration test creates an isolated temporary D1/R2 store, applies migrations, starts its own loopback server, performs synthetic transactions and removes that store when finished. It does not modify the local interactive demo database or hosted data.
+This runs link checks, ESLint, TypeScript, regression tests, service-worker syntax validation, the production build and the built API integration test. The integration test creates an isolated temporary D1/R2 store, applies migrations, starts its own loopback server, performs synthetic transactions and removes that store when finished. It does not modify the local interactive demo database or hosted data.
 
 Individual commands:
 
@@ -56,7 +56,7 @@ The public prototype and collector walkthrough are on [GitHub Pages](https://kar
 
 ## Offline / install testing
 
-The development server intentionally does not register the production service worker. Use the installed/hosted production build for the manual Android offline and installation checklist in [testing](testing.md#manual-device-acceptance). Open online once, wait for caching, then test without connectivity. Keeping the app open is required for sync.
+The development server intentionally does not register the production service worker. Use the installed/hosted production build for the manual Android offline and installation checklist in [testing](testing.md#manual-device-acceptance). Open online once, wait for caching, then test without connectivity. Keep the app open during sync. On a shared device, use **Settings → Clear offline data on this device** after syncing. This deletes all local drafts, photos, recordings and cached records for every account in that browser. Uploaded records stay on the server. Select **Reopen online** when you want to use the browser again.
 
 ## Troubleshooting
 

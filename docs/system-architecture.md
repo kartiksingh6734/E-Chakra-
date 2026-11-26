@@ -90,7 +90,7 @@ erDiagram
 
 Open online once. Draft capture, cached records and local media can then be available offline. Publishing, acceptance, handover confirmation, profile updates and payments require a server response. Sync runs on startup, reconnection, manual request and periodic foreground retries; there is no closed-app background sync.
 
-API/auth routes are not cached by the service worker. IndexedDB is not encrypted and retains the last owner's cached scope. Offline reload, eviction and shared-device acceptance remain testing work. Use synthetic demo data.
+API/auth routes are not cached by the service worker. IndexedDB retains the last verified workspace for offline use. Online startup verifies the current owner before showing records. Settings can clear all cached workspaces and unsynced drafts in this browser. A successful online reopen enables caching again. Physical-device storage eviction and recovery still need testing.
 
 ## Difference from the presentation
 

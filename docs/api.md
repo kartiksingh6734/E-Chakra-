@@ -15,7 +15,7 @@ Source: [record routes](../prototype/app/api/ec/route.ts), [media routes](../pro
 | `PUT /api/media?id=UUID` | Upload attachment bytes | JPEG/PNG/WebP or WebM/MP4/OGG audio; >0 and at most 2,000,000 bytes; returns `id` |
 | `GET /api/media?id=UUID` | Read owned attachment | Binary body with recorded media type; another owner receives 404 |
 
-Uploaded attachment IDs must belong to the owner before being linked to a lot. Input category is one of the eight [catalog entries](../prototype/lib/domain.ts); LCD panels/motors use whole pieces, other categories use kg. Quantities must be positive and at most 100,000. Creation requests are limited to 20,000 characters by the record endpoint.
+Photo and audio IDs must belong to the owner and match the attachment field. The upload checks the declared type against the file signature. Retrying an upload with the same ID and identical bytes succeeds. Different contents for that ID return 409. Input category is one of the eight [catalog entries](../prototype/lib/domain.ts); LCD panels/motors use whole pieces, other categories use kg. Quantities must be positive and at most 100,000. The record endpoint accepts up to 20,000 UTF-16 code units of JSON and reads at most 60,000 UTF-8 bytes. This preserves space for Hindi and Marathi text.
 
 ## Mutations
 
@@ -30,7 +30,7 @@ Uploaded attachment IDs must belong to the owner before being linked to a lot. I
 | `confirm_payment` | Collector | `paymentId`; unconfirmed payment claim |
 | `dispute` | Collector | `reason` of at least five characters; accepted/handover/received state |
 
-`opId` identifies the intended mutation, not each network attempt. Retrying the same mutation should reuse it. The UI currently creates a fresh operation ID on a new user attempt; lot creation reuses the persisted draft UUID. Only the last 256 mutation IDs are retained. A stale `version` returns 409.
+`opId` identifies the intended mutation, not each network attempt. Retrying the same mutation should reuse it. Within an open session the UI reuses the operation ID for a retry of the same action, inputs and version after an uncertain response. It checks the refreshed lot for the operation before showing a failure. Lot creation reuses the persisted draft UUID. Only the last 256 mutation IDs are retained. A stale `version` returns 409.
 
 ## Authentication and errors
 
@@ -42,8 +42,8 @@ Production trusts a hosting-injected owner header. This is a private demo deploy
 | 401 | Missing production owner identity |
 | 403 | Provided request origin differs from the application's origin |
 | 404 | Lot/media not available to this owner |
-| 409 | Stale update or media identifier conflict |
+| 409 | Stale update, changed workspace, or a media identifier already used for another upload |
 | 413 | Oversized record request or media attachment |
 | 503 | Storage or unexpected server failure |
 
-Record responses are `no-store`. Media responses are private-cacheable for up to one hour. Request origin checking is one boundary check; it does not replace real session authentication or a complete CSRF design. [Integration tests](../prototype/tests/integration.mjs) exercise the compiled routes with synthetic trusted identities in a local harness.
+The collector sends the snapshot’s `scope` in the `X-E-Chakra-Scope` header on writes. If the authenticated workspace has changed, the server returns 409 before saving the operation. The hosting identity still determines ownership. Record and media responses use `no-store`. Request origin checking is one boundary check; it does not replace real session authentication or a complete CSRF design. [Integration tests](../prototype/tests/integration.mjs) exercise the compiled routes with synthetic trusted identities in a local harness.

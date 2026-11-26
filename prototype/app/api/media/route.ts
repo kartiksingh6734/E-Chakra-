@@ -1,28 +1,94 @@
-import { database,bucket,ownerOf,sameOrigin,fail } from '@/lib/server';
+import { z } from 'zod';
+import { database, bucket, ownerOf, sameOrigin, checkScope, fail } from '@/lib/server';
 import { DomainError } from '@/lib/domain';
-export const dynamic='force-dynamic';
-export async function PUT(request:Request){
- try{
-  sameOrigin(request);const owner=ownerOf(request);const id=new URL(request.url).searchParams.get('id')||'';
-  if(!/^[0-9a-f-]{36}$/.test(id))throw new DomainError('Invalid attachment reference');
-  const mime=(request.headers.get('content-type')||'').split(';')[0];
-  if(!['image/jpeg','image/png','image/webp','audio/webm','audio/mp4','audio/ogg'].includes(mime))throw new DomainError('Unsupported file type');
-  const body=await request.arrayBuffer();if(!body.byteLength||body.byteLength>2000000)throw new DomainError('Keep attachments below 2 MB',413);
-  const existing=await database().prepare('SELECT owner FROM media WHERE id=?').bind(id).first<{owner:string}>();
-  if(existing){if(existing.owner!==owner)throw new DomainError('Attachment reference already used',409);return Response.json({id})}
-  const key=crypto.randomUUID();
-  await bucket().put(key,body,{httpMetadata:{contentType:mime}});
-  try{await database().prepare('INSERT INTO media(id,owner,mime,object_key,created_at) VALUES(?,?,?,?,?)').bind(id,owner,mime,key,new Date().toISOString()).run()}
-  catch(error){await bucket().delete(key);throw error}
-  return Response.json({id});
- }catch(e){return fail(e)}
+import { readBoundedBody } from '@/lib/request-body';
+
+import { checkSignature, maxMediaBytes, mediaType } from '@/lib/media-format';
+
+export const dynamic = 'force-dynamic';
+
+const privateHeaders = { 'Cache-Control': 'private, no-store' };
+function attachmentId(request: Request) {
+  const result = z.string().uuid().safeParse(new URL(request.url).searchParams.get('id'));
+  if (!result.success) throw new DomainError('Invalid attachment reference');
+  return result.data;
 }
-export async function GET(request:Request){
- try{
-  const owner=ownerOf(request),id=new URL(request.url).searchParams.get('id')||'';
-  const row=await database().prepare('SELECT object_key,mime FROM media WHERE id=? AND owner=?').bind(id,owner).first<{object_key:string;mime:string}>();
-  if(!row)throw new DomainError('Attachment not found',404);
-  const obj=await bucket().get(row.object_key);if(!obj)throw new DomainError('Attachment unavailable',404);
-  return new Response(obj.body,{headers:{'Content-Type':row.mime,'Cache-Control':'private, max-age=3600','X-Content-Type-Options':'nosniff'}});
- }catch(e){return fail(e)}
+
+type MediaRow = { owner: string; mime: string; object_key: string };
+function findMedia(id: string) {
+  return database().prepare('SELECT owner, mime, object_key FROM media WHERE id=?')
+    .bind(id).first<MediaRow>();
+}
+
+async function confirmRetry(row: MediaRow, owner: string, mime: string, bytes: Uint8Array) {
+  const conflict = () => new DomainError('Attachment reference already used', 409);
+  if (row.owner !== owner || row.mime !== mime) throw conflict();
+  const object = await bucket().get(row.object_key);
+  if (!object) throw new DomainError('Attachment storage is unavailable', 503);
+  const stored = new Uint8Array(await object.arrayBuffer());
+  if (stored.length !== bytes.length || !stored.every((byte, index) => byte === bytes[index])) {
+    throw conflict();
+  }
+}
+
+export async function PUT(request: Request) {
+  try {
+    sameOrigin(request);
+    const owner = ownerOf(request);
+    await checkScope(request, owner);
+    const id = attachmentId(request);
+    const mime = mediaType(request.headers.get('content-type') || '');
+    const bytes = await readBoundedBody(request, maxMediaBytes);
+    checkSignature(mime, bytes);
+
+    const reply = () => Response.json({ id }, { headers: privateHeaders });
+    const existing = await findMedia(id);
+    if (existing) {
+      await confirmRetry(existing, owner, mime, bytes);
+      return reply();
+    }
+
+    const key = crypto.randomUUID();
+    const storage = bucket();
+    await storage.put(key, bytes, { httpMetadata: { contentType: mime } });
+    let changed: number;
+    try {
+      const result = await database().prepare(
+        'INSERT INTO media(id,owner,mime,object_key,created_at) VALUES(?,?,?,?,?) ON CONFLICT(id) DO NOTHING'
+      ).bind(id, owner, mime, key, new Date().toISOString()).run();
+      changed = result.meta.changes;
+    } catch (error) {
+      // A timed-out insert may have committed. Keep any object referenced in D1.
+      const current = await findMedia(id);
+      if (current?.object_key !== key) await storage.delete(key);
+      throw error;
+    }
+    if (!changed) {
+      await storage.delete(key);
+      const current = await findMedia(id);
+      if (!current) throw new DomainError('Attachment storage is unavailable', 503);
+      await confirmRetry(current, owner, mime, bytes);
+    }
+    return reply();
+  } catch (error) {
+    return fail(error);
+  }
+}
+
+export async function GET(request: Request) {
+  try {
+    const owner = ownerOf(request);
+    await checkScope(request, owner);
+    const id = attachmentId(request);
+    const row = await database().prepare('SELECT object_key,mime FROM media WHERE id=? AND owner=?')
+      .bind(id, owner).first<Pick<MediaRow, 'object_key' | 'mime'>>();
+    if (!row) throw new DomainError('Attachment not found', 404);
+    const object = await bucket().get(row.object_key);
+    if (!object) throw new DomainError('Attachment unavailable', 404);
+    return new Response(object.body, {
+      headers: { ...privateHeaders, 'Content-Type': row.mime, 'X-Content-Type-Options': 'nosniff' }
+    });
+  } catch (error) {
+    return fail(error);
+  }
 }

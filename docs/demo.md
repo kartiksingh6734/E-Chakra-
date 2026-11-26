@@ -54,4 +54,4 @@ Expected financial checkpoints:
 
 ## Before presenting
 
-Record the commit shown, device/browser and which checks were actually observed. Ensure the judge can access your chosen demonstration path. A current, public-safe screen recording and actual mobile screenshots still need to be captured; generated mockups are not substitutes for execution evidence.
+Record the commit shown, device/browser and which checks were actually observed. Ensure the judge can access your chosen demonstration path. The [browser verification](testing.md#desktop-chromium-verification) includes a recording and screenshots. Capture physical-device results separately when presenting Android acceptance.

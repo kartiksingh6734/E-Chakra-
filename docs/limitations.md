@@ -13,7 +13,7 @@
 - No partial-lot remaining-quantity ledger, cancellation, revised handover negotiation, staff dispute resolution, aggregation or reward payouts.
 - No portable collector identity, NBFC integration, EPR certificate, downstream recycling proof or validated impact metric.
 - The API loads at most 500 recent lots. Each lot is a JSON document, event history can grow, and duplicate-mutation tracking retains only the last 256 IDs. No scale/load claim is supported.
-- Local cached data is not encrypted/purged through a complete account lifecycle; retention, backup/recovery and incident processes are unfinished.
+- Offline data is unencrypted. Settings can clear this browser’s offline data for all accounts. Server-side retention, account deletion, backup/recovery and incident processes remain open.
 
 ## Release gates
 

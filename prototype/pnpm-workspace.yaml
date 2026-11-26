@@ -4,8 +4,10 @@ minimumReleaseAgeIgnoreMissingTime: false
 trustLockfile: false
 strictDepBuilds: true
 allowBuilds:
+  '@firebase/util': false
   esbuild: true
   fsevents: true
+  protobufjs: false
   sharp: true
   unrs-resolver: true
   workerd: true
@@ -18,4 +20,8 @@ packageImportMethod: auto
 verifyDepsBeforeRun: false
 optimisticRepeatInstall: false
 overrides:
-  miniflare>sharp: 0.35.4
+  sharp@<0.35.5: 0.35.5
+  "@esbuild-kit/core-utils>esbuild": 0.25.12
+  "fflate@>=0.7.0 <0.7.5": 0.7.5
+  "@typescript-eslint/typescript-estree>minimatch": ^11.0.1
+  "@firebase/firestore>@grpc/grpc-js": 1.14.7
