@@ -23,6 +23,10 @@ pnpm run verify
 
 Verification covers documentation links, ESLint, types, regression tests, service-worker syntax, the build and the API on an isolated fresh local database. Manual installation/camera/offline reload tests remain separate.
 
+## GitHub Pages release
+
+`pnpm run build:pages` produces the static site in `dist-pages/` for the `/E-Chakra-/` repository path. Preview it with `pnpm exec vite preview --config vite.pages.config.ts`. To republish, copy the generated site into the root of the `gh-pages` branch, preserving that branch's `firebase-config.json`. The build includes an empty configuration for a fresh installation. The deployed file supplies the public Firebase web settings without a rebuild. [Public site and activation guide](../docs/github-pages.md)
+
 ## Code map
 
 | Path | Responsibility |

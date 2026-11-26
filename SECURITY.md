@@ -4,6 +4,12 @@
 
 This build is a private demonstration using synthetic buyers, prices and transactions. It is not ready to store real collector financial records in a public pilot.
 
+## GitHub Pages identity and data
+
+The Pages release uses Firebase's Google and phone sign-in providers. Its IndexedDB keys are scoped to the Pages application, Firebase project and user ID. Sign-out unmounts the workspace and an account change invalidates in-flight local operations. The browser holds the records and media in unencrypted local storage. Anyone with control of that browser profile can inspect its storage. The public walkthrough contains synthetic data. [Activation and device-storage details](docs/github-pages.md)
+
+The following Worker controls apply to the D1/R2 version.
+
 ## Current controls
 
 - Production requires the `oai-authenticated-user-id` identity supplied by the trusted hosting boundary; development has a local demo fallback.

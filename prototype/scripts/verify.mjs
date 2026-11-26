@@ -9,6 +9,7 @@ const checks = [
   ['Regression tests', ['--experimental-transform-types', '--test', 'tests/*.test.mjs']],
   ['Service worker syntax', ['--check', 'public/sw.js']],
   ['Production build', ['scripts/run-framework.mjs', 'build']],
+  ['GitHub Pages production build', ['scripts/build-pages.mjs']],
   ['Fresh-database API integration', ['tests/integration.mjs']],
 ];
 for (const [label, args] of checks) {

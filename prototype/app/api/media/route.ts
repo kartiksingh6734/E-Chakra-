@@ -3,26 +3,11 @@ import { database, bucket, ownerOf, sameOrigin, checkScope, fail } from '@/lib/s
 import { DomainError } from '@/lib/domain';
 import { readBoundedBody } from '@/lib/request-body';
 
+import { checkSignature, maxMediaBytes, mediaType } from '@/lib/media-format';
+
 export const dynamic = 'force-dynamic';
-const maxBytes = 2_000_000;
+
 const privateHeaders = { 'Cache-Control': 'private, no-store' };
-const signatures: Record<string, (bytes: Uint8Array) => boolean> = {
-  'image/jpeg': bytes => startsWith(bytes, [0xff, 0xd8, 0xff]),
-  'image/png': bytes => startsWith(bytes, [0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]),
-  'image/webp': bytes => tag(bytes, 0) === 'RIFF' && tag(bytes, 8) === 'WEBP',
-  'audio/webm': bytes => startsWith(bytes, [0x1a, 0x45, 0xdf, 0xa3]),
-  'audio/mp4': bytes => tag(bytes, 4) === 'ftyp',
-  'audio/ogg': bytes => tag(bytes, 0) === 'OggS',
-};
-
-function startsWith(bytes: Uint8Array, prefix: number[]) {
-  return prefix.every((byte, index) => bytes[index] === byte);
-}
-
-function tag(bytes: Uint8Array, offset: number) {
-  return String.fromCharCode(...bytes.subarray(offset, offset + 4));
-}
-
 function attachmentId(request: Request) {
   const result = z.string().uuid().safeParse(new URL(request.url).searchParams.get('id'));
   if (!result.success) throw new DomainError('Invalid attachment reference');
@@ -52,10 +37,9 @@ export async function PUT(request: Request) {
     const owner = ownerOf(request);
     await checkScope(request, owner);
     const id = attachmentId(request);
-    const mime = (request.headers.get('content-type') || '').split(';')[0].trim().toLowerCase();
-    if (!Object.hasOwn(signatures, mime)) throw new DomainError('Unsupported file type');
-    const bytes = await readBoundedBody(request, maxBytes);
-    if (!signatures[mime](bytes)) throw new DomainError('File contents do not match the attachment type');
+    const mime = mediaType(request.headers.get('content-type') || '');
+    const bytes = await readBoundedBody(request, maxMediaBytes);
+    checkSignature(mime, bytes);
 
     const reply = () => Response.json({ id }, { headers: privateHeaders });
     const existing = await findMedia(id);

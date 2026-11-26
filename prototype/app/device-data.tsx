@@ -2,7 +2,7 @@
 
 import { useState, useSyncExternalStore, type ReactNode } from 'react';
 import type { Lang } from '@/lib/domain';
-import { clearDeviceData, deviceIsActive, deviceMarker, reopenDevice, watchDevice } from '@/lib/device-storage';
+import { clearDeviceData, deviceIsActive, deviceMarker, isPagesDemo, languageKey, reopenDevice, watchDevice } from '@/lib/device-storage';
 
 const copy = {
   en: {
@@ -40,9 +40,33 @@ const copy = {
   },
 };
 
+const localCopy = {
+  en: {
+    clear: 'Delete demo data on this device',
+    confirm: 'Permanently delete the demo records, drafts, photos and recordings for every E-CHAKRA account in this browser? These records cannot be restored.',
+    reopen: 'Open an empty workspace',
+    resume: 'Your demo records on this device have been deleted. You can start a new workspace.',
+  },
+  hi: {
+    clear: 'इस डिवाइस से डेमो डेटा हटाएं',
+    confirm: 'इस ब्राउज़र के सभी E-CHAKRA खातों के डेमो रिकॉर्ड, ड्राफ़्ट, फोटो और रिकॉर्डिंग हमेशा के लिए हटाएं? इन्हें वापस नहीं लाया जा सकता।',
+    reopen: 'खाली वर्कस्पेस खोलें',
+    resume: 'इस डिवाइस के डेमो रिकॉर्ड हटा दिए गए हैं। आप नया वर्कस्पेस शुरू कर सकते हैं।',
+  },
+  mr: {
+    clear: 'या डिव्हाइसवरील डेमो डेटा हटवा',
+    confirm: 'या ब्राउझरमधील सर्व E-CHAKRA खात्यांच्या डेमो नोंदी, मसुदे, फोटो व रेकॉर्डिंग कायमचे हटवायचे? या नोंदी परत मिळवता येणार नाहीत.',
+    reopen: 'रिकामी कार्यजागा उघडा',
+    resume: 'या डिव्हाइसवरील डेमो नोंदी हटवल्या आहेत. तुम्ही नवी कार्यजागा सुरू करू शकता.',
+  },
+};
+function deviceCopy(lang: Lang) {
+  return isPagesDemo ? { ...copy[lang], ...localCopy[lang] } : copy[lang];
+}
+
 export function ClearDeviceButton({ lang }: { lang: Lang }) {
   const [failed, setFailed] = useState(false);
-  const t = copy[lang];
+  const t = deviceCopy(lang);
   return <>
     <button className="btn danger" type="button" onClick={() => {
       if (window.confirm(t.confirm)) void clearDeviceData().catch(() => setFailed(true));
@@ -64,10 +88,10 @@ export function DeviceGate({ children }: { children: ReactNode }) {
   if (state === 'active') return children;
   let lang: Lang = 'hi';
   try {
-    const stored = localStorage.getItem('echakra-language');
+    const stored = localStorage.getItem(languageKey);
     if (stored === 'mr' || stored === 'en') lang = stored;
   } catch {}
-  const t = copy[lang];
+  const t = deviceCopy(lang);
   const clearing = state === 'clearing';
   async function proceed() {
     setBusy(true);

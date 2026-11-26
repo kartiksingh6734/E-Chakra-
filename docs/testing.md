@@ -49,6 +49,29 @@ A [23 October follow-up](evidence/verification-followup.txt) repeated the comple
 
 The initial local verification reuses installed locked dependencies from the earlier prototype workspace; it is not evidence of a fresh internet dependency installation. GitHub Actions performs its own dependency installation. Neither automated path is a physical-device test or a penetration test.
 
+## Test GitHub Pages sign-in locally
+
+On 26 November 2026, Chromium and the Firebase Auth Emulator exercised Google sign-in, SMS code rejection and acceptance, photo and lot persistence, and sign-out across two tabs. The phone account opened an empty workspace. Returning to the Google account restored its lot. These checks use local identities and fictional numbers. Live provider activation requires the [project owner's Firebase setup](github-pages.md).
+
+To repeat the optional [browser test](../prototype/tests/pages-auth.browser.py), run these commands from `prototype/` in separate terminals. Install Python Playwright and its Chromium browser first (`python -m pip install playwright` and `python -m playwright install chromium`). The standard `pnpm run verify` also builds the GitHub Pages release.
+
+```sh
+# Terminal 1
+npx --yes firebase-tools@15.37.0 emulators:start --only auth --project demo-echakra --config github-pages/firebase.emulator.json
+```
+
+```sh
+# Terminal 2
+VITE_FIREBASE_AUTH_EMULATOR=true \
+VITE_FIREBASE_CONFIG='{"apiKey":"test-only","authDomain":"demo-echakra.firebaseapp.com","projectId":"demo-echakra","appId":"1:123456:web:abc"}' \
+pnpm run dev:pages --host 127.0.0.1 --port 8190 --strictPort
+```
+
+```sh
+# Terminal 3
+python tests/pages-auth.browser.py
+```
+
 ## Manual device acceptance
 
 **Physical Android acceptance is pending.** Record the commit, phone model, OS/browser, language, date, observed result and a sanitised screenshot or video for each test.
