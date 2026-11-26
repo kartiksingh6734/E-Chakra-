@@ -39,7 +39,7 @@ Manual category selection and simple eligibility rules are implemented. **Traine
 
 ## Try it
 
-Open the **[E-CHAKRA prototype on GitHub Pages](https://kartiksingh6734.github.io/E-Chakra-/)**. Anyone can watch the collector walkthrough. The [local setup](docs/setup.md) also runs without a cloud account or API key.
+Open the **[E-CHAKRA prototype on GitHub Pages](https://kartiksingh6734.github.io/E-Chakra-/)**. Anyone can watch the collector walkthrough. [Connect Google and phone sign-in](docs/github-pages.md) to open account workspaces. The [local setup](docs/setup.md) also runs without a cloud account or API key.
 
 ```bash
 git clone https://github.com/kartiksingh6734/E-Chakra-.git

@@ -2,7 +2,13 @@
 
 [Home](../README.md) · [Workflow](collector-workflow.md) · [API](api.md) · [Security](../SECURITY.md)
 
-One responsive application and one Worker API support the prototype. These five layers describe responsibilities, not five independently deployed services. Solid connections are implemented paths. Planned integrations are listed separately.
+## GitHub Pages version
+
+The [public prototype](https://kartiksingh6734.github.io/E-Chakra-/) serves the React application and walkthrough from GitHub Pages. When the maintainer connects a Firebase project, Google or SMS sign-in supplies the user's identity. IndexedDB stores that user's lots, photos and receipts on this device. Collector and recycler actions use the same transaction rules. A service worker caches the app shell for offline use. The Pages version has no server-side ledger or cross-device record sync. [Firebase setup](github-pages.md)
+
+## Worker version
+
+One responsive application and one Worker API support the local and server-backed prototype. These five layers describe responsibilities, not five independently deployed services. Solid connections are implemented paths. Planned integrations are listed separately.
 
 ```mermaid
 flowchart TD
