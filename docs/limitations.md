@@ -4,7 +4,7 @@
 
 ## Current limits
 
-- The hosted app is owner-private; repository access does not provide app access.
+- The [GitHub Pages prototype](https://kartiksingh6734.github.io/E-Chakra-/) includes a public walkthrough. The Worker version uses a separate deployment and identity boundary.
 - Collector/recycler role switching is a demonstration inside one workspace. Real buyer identity and permissions are not implemented.
 - Manual category selection; no trained AI, speech recognition, live price feed, maps or payment transfer.
 - Synthetic buyer names, price rates, distances and authorisation labels; no verified recycler partnership is claimed.

@@ -16,7 +16,7 @@ Watch the collector capture a lot offline, reconnect, confirm a handover and set
 
 Follow [the scripted example](demo.md): a synthetic 10 kg PCB lot, compared offers, a final 9 kg / ₹3,000 agreement, two payment claims and two collector confirmations. Observe the balance between confirmations. The recycler role belongs to the same private owner workspace, not a separately authenticated business.
 
-The hosted deployment is owner-private. Use a maintainer-led session or [local setup](setup.md). The presentation links a [team-provided video](https://drive.google.com/file/d/1beBZdxFbpla45hIuDcNdBsqNrNQS-4br/view); access and correspondence to the current code have not been verified. The written script and source are the reproducible fallback.
+Reviewers can open [E-CHAKRA on GitHub Pages](https://kartiksingh6734.github.io/E-Chakra-/), watch the collector walkthrough or use the [local setup](setup.md). The presentation links a [team-provided video](https://drive.google.com/file/d/1beBZdxFbpla45hIuDcNdBsqNrNQS-4br/view); access and correspondence to the current code have not been verified. The written script and source are the reproducible fallback.
 
 ## Evidence by review question
 

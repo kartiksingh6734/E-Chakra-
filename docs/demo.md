@@ -6,8 +6,7 @@ Use synthetic data only. The two roles belong to one owner workspace. Buyer name
 
 ## Access
 
-- [Recorded collector walkthrough](evidence/desktop-chromium/demo.webm) from desktop Chromium at mobile width. It shows a synthetic lot moving from offline capture through payment confirmation.
-- [Hosted prototype](https://e-chakra-collector.kartiksingh6734.chatgpt.site): owner-private, for a maintainer-led session.
+- [E-CHAKRA on GitHub Pages](https://kartiksingh6734.github.io/E-Chakra-/) hosts the public prototype and [collector walkthrough](https://kartiksingh6734.github.io/E-Chakra-/walkthrough.webm).
 - [Local setup](setup.md): reproducible alternative without a cloud account.
 - [Team-provided presentation video](https://drive.google.com/file/d/1beBZdxFbpla45hIuDcNdBsqNrNQS-4br/view): external access/content not verified; it may show an older design. Do not treat it as test evidence for this revision.
 

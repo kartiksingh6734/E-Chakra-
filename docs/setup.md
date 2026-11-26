@@ -52,7 +52,7 @@ The API test requires a completed build. The [GitHub workflow](../.github/workfl
 
 Production requires trusted server-supplied identity. Do not expose the built Worker as a public standalone service while trusting a client-provided `oai-authenticated-user-id` header. Replace that adapter with genuine authentication if changing the hosting boundary. See [security](../SECURITY.md).
 
-The maintained hosted app is owner-private. Repository visibility does not grant app access. Arrange a maintainer-led review or run locally. No deployment or sharing change is performed by the CI workflow.
+The public prototype and collector walkthrough are on [GitHub Pages](https://kartiksingh6734.github.io/E-Chakra-/). The local Worker commands above run the D1/R2 version.
 
 ## Offline / install testing
 
@@ -67,7 +67,7 @@ The development server intentionally does not register the production service wo
 | Missing `dist/server/wrangler.json` | Run `pnpm run build` first |
 | Missing database table | Run `pnpm run db:local`, then restart development |
 | Port 5173 occupied | Stop your other local development server and restart `pnpm run dev` |
-| Hosted sign-in/access prompt | Use the owning account for a maintainer-led session; this is not public reviewer access |
+| Reviewer needs a public demo | Open the [GitHub Pages prototype](https://kartiksingh6734.github.io/E-Chakra-/) and select the walkthrough |
 | Camera/microphone blocked | Check browser permissions and secure-context support; file upload remains available |
 | Sample quotes expired | Create a new demo lot; quotes have a three-day validity period |
 
